@@ -9,7 +9,8 @@ const os = require("os");
 fs = require('fs');
 
 const networkInterfaces = os.networkInterfaces();
-const ip = networkInterfaces['Ethernet 2'][1].address;
+const ip = process.env.HOST_NAME;
+// const ip = networkInterfaces['Ethernet 2'][1].address;
 // const ip = '192.168.43.123';
 // const ip = networkInterfaces.Ethernet[1].address;
 // console.log(networkInterfaces['Ethernet 2'][1].address);
