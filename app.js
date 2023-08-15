@@ -6,9 +6,13 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
 const os = require("os");
+fs = require('fs');
 
 const networkInterfaces = os.networkInterfaces();
-const ip = networkInterfaces.Ethernet[1].address;
+const ip = networkInterfaces['Ethernet 2'][1].address;
+// const ip = '192.168.43.123';
+// const ip = networkInterfaces.Ethernet[1].address;
+// console.log(networkInterfaces['Ethernet 2'][1].address);
 //config
 require("dotenv/config");
 
