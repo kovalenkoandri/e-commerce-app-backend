@@ -27,6 +27,7 @@ const notification = require("./middlewares/pushNotification");
 
 //Connect to DB
 const dbURI = process.env.DB_CONNECTION;
+mongoose.set('strictQuery', false);
 mongoose.connect(
   dbURI,
   {
