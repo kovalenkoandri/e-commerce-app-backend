@@ -12,7 +12,7 @@ const loginValidation = (data) => {
   const schema = Joi.object({
     email: Joi.string().min(6).required().email(),
     password: Joi.string().min(6).required(),
-    pushTokens: Joi.array(),
+    // pushTokens: Joi.array(),
   });
   return schema.validate(data);
 };

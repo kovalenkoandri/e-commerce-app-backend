@@ -30,7 +30,7 @@ const registerSchema = new Schema({
   },
   pushTokens: {
     type: Array,
-    required: true,
+    // required: true,
   },
 });
 

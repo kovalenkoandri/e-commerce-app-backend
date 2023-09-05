@@ -32,7 +32,7 @@ const user_register = async (req, res) => {
     name: req.body.name,
     email: req.body.email.toLowerCase(),
     password: hashedPassword,
-    pushTokens: req.body.pushTokens,
+    // pushTokens: req.body.pushTokens,
     phone: '',
     address: '',
     profilePicture: '',
@@ -59,7 +59,7 @@ const user_login = async (req, res) => {
   const { error } = loginValidation(req.body);
   const email = req.body.email.toLowerCase();
   const { password } = req.body;
-  const pushTokens = req.body.pushTokens;
+  // const pushTokens = req.body.pushTokens;
 
   if (error) {
     return res.status(400).send(error.details[0].message);

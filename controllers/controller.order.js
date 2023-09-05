@@ -41,8 +41,8 @@ const order_post = async (req, res) => {
     });
   }
   let content = {
-    title: "Cập nhật đơn hàng",
-    body: `Đơn hàng của bạn đã được đặt thành công.`,
+    title: 'Order Updates',
+    body: `Your order has been placed successfully.`,
   };
 
   const order = new Order(req.body.orderInfo);
@@ -94,8 +94,8 @@ const order_update = async (req, res) => {
     });
   }
   let content = {
-    title: "Cập nhật đơn hàng",
-    body: `Đơn hàng ${id.substr(id.length - 10)} đã được ${updateStatus}.`,
+    title: 'Order Updates',
+    body: `Orders ${id.substr(id.length - 10)} has been ${updateStatus}.`,
   };
   try {
     const resOrder = await Order.findByIdAndUpdate(id, {
