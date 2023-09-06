@@ -30,26 +30,27 @@ const dbURI = process.env.DB_CONNECTION;
 mongoose.set('strictQuery', false);
 mongoose.connect(
   dbURI,
+  // https://mongoosejs.com/docs/5.x/docs/connections.html#error-handling
   {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
+    useUnifiedTopology: false,
+    // useFindAndModify: false,
+    // useCreateIndex: true,
   },
   () => {
     app.listen(process.env.PORT, ip);
     let dirPath = path.join(
       __dirname,
-      "public/api/static/images/productPictures"
+      'public/api/static/images/productPictures',
     );
     let dirPathUser = path.join(
       __dirname,
-      "public/api/static/images/userprofile"
+      'public/api/static/images/userprofile',
     );
     createDir(dirPath);
     createDir(dirPathUser);
-    console.log("Connected to DB");
-  }
+    console.log('Connected to DB');
+  },
 );
 
 function createDir(dirPath) {

@@ -39,16 +39,16 @@ const user_register = async (req, res) => {
   });
   try {
     const resUser = await user.save();
-    const sendEmail = () => {
-      transporter.sendMail(registerUserTemplate(resUser), (err, info) => {
-        if (err) {
-          res.status(500).send({ err: 'Error sending email' });
-        } else {
-          console.log(`** Email sent **`, info);
-        }
-      });
-    };
-    sendEmail();
+    // const sendEmail = () => {
+    //   transporter.sendMail(registerUserTemplate(resUser), (err, info) => {
+    //     if (err) {
+    //       res.status(500).send({ err: 'Error sending email' });
+    //     } else {
+    //       console.log(`** Email sent **`, info);
+    //     }
+    //   });
+    // };
+    // sendEmail();
     res.status(200).json(resUser);
   } catch (err) {
     res.status(400).send(err);
