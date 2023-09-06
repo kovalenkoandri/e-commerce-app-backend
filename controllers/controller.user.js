@@ -95,17 +95,17 @@ const user_login = async (req, res) => {
     if (!passMatching) {
       return res.status(400).send({ err: 'Email or password is wrong' });
     }
-    let checkPushToken;
-    if (pushTokens.length > 0) {
-      const check = user.pushTokens.some((userPushToken) => {
-        return userPushToken === pushTokens[0];
-      });
-      checkPushToken = check;
-    }
-    if (checkPushToken !== undefined) {
-      user.pushTokens.push(pushTokens[0]);
-      await user.save();
-    }
+    // let checkPushToken;
+    // if (pushTokens.length > 0) {
+    //   const check = user.pushTokens.some((userPushToken) => {
+    //     return userPushToken === pushTokens[0];
+    //   });
+    //   checkPushToken = check;
+    // }
+    // if (checkPushToken !== undefined) {
+    //   user.pushTokens.push(pushTokens[0]);
+    //   await user.save();
+    // }
     try {
       jwt.sign(
         { userId: user._id },
