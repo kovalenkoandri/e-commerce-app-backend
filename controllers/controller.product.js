@@ -32,26 +32,27 @@ const product_get = (req, res) => {
 
 const product_post = (req, res) => {
   const host = process.env.HOST_NAME;
-  const filename = req.body.filename.replace(/ +/g, "");
+  const filename = req.body.filename.replace(/ +/g, ''); // postman form-data first-field file, second field name of file
+  // const filename = req.file.filename; // fallback postman direct take filename from first field of form-data
   if (!req.body || !req.file) {
     return res.status(200).send({
-      status: "ERR_REQUEST",
-      message: "Please check your request!",
+      status: 'ERR_REQUEST',
+      message: 'Please check your request!',
       content: null,
     });
   }
 
   const imageUrl =
-    host + "/public/api/static/images/productPictures/" + filename + ".jpg";
+    host + '/public/api/static/images/productPictures/' + filename + '.jpg';
   const resizeUrl =
     host +
-    "/public/api/static/images/productPictures/" +
-    "256x144-" +
+    '/public/api/static/images/productPictures/' +
+    '256x144-' +
     filename +
-    ".jpg";
+    '.jpg';
 
   const product = new Product({
-    filename: req.body.filename,
+    filename,
     price: req.body.price,
     color: req.body.color,
     origin: req.body.origin,
@@ -65,14 +66,14 @@ const product_post = (req, res) => {
     .save()
     .then((data) => {
       return res.status(200).send({
-        status: "OK",
-        message: "Added Product Successfully",
+        status: 'OK',
+        message: 'Added Product Successfully',
         content: data,
       });
     })
     .catch((err) => {
       return res.status(400).send({
-        status: "ERR_SERVER",
+        status: 'ERR_SERVER',
         message: err.message,
         content: null,
       });
