@@ -84,13 +84,15 @@ const cart_post = (req, res) => {
         })
         .catch((err) => console.log(err));
     }
-  }).catch((err) => {
-    return res.status(400).send({
-      status: "ERR_SERVER",
-      message: err.message,
-      content: null,
+  })
+    .clone()
+    .catch((err) => {
+      return res.status(400).send({
+        status: "ERR_SERVER",
+        message: err.message,
+        content: null,
+      });
     });
-  });
 };
 const cart_update = (req, res) => {
   const id = req.params.id;
