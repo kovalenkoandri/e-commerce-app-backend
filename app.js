@@ -19,7 +19,7 @@ require("dotenv/config");
 
 //import routes
 // const productRoute = require("./routes/product");
-const productNovaRoute = require("./routes/productNova");
+const productAvtoNovaRoute = require("./routes/productAvtoNova");
 const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 const favoriteRoute = require("./routes/favorite");
@@ -85,7 +85,7 @@ app.get("/expo", (req, res) => {
   res.end();
 });
 // app.use(`/api/${process.env.VERSION}/product`, productRoute);
-app.use(`/api/${process.env.VERSION}/product`, productNovaRoute);
+app.use(`/api/${process.env.VERSION}/product`, productAvtoNovaRoute);
 app.use(`/api/${process.env.VERSION}/cart`, cartRoute);
 app.use(`/api/${process.env.VERSION}/order`, orderRoute);
 app.use(`/api/${process.env.VERSION}/favoritelist`, favoriteRoute);

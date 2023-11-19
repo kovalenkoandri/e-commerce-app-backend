@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const productSchemaNova = new Schema(
+const productSchemaAvtoNova = new Schema(
   {
     'Автомобильный бренд': {
       type: String,
@@ -72,6 +72,6 @@ const productSchemaNova = new Schema(
   },
   { timestamps: true },
 );
-const Product = mongoose.model('product5', productSchemaNova);
+const Product = mongoose.model('product5', productSchemaAvtoNova);
 
 module.exports = Product;

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { upload, resize } = require("../middlewares/upload");
-const productController = require("../controllers/controller.productNova");
+const productController = require("../controllers/controller.productAvtoNova");
 
 router.get("/", productController.product_get);
 

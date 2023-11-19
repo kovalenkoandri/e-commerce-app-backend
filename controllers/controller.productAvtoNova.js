@@ -1,4 +1,4 @@
-const Product = require("../models/productNova");
+const Product = require("../models/productAvtoNova");
 
 const product_get = (req, res) => {
   let page = parseInt(req.query.page) || 0; //for next page pass 1 here
