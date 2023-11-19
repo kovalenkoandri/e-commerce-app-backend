@@ -34,8 +34,30 @@ const product_getByFabricOrOriginalId = async (req, res) => {
   const { fabrictId } = req.params;
   const data = await Product.find({
     $or: [
-      { "Каталожный номер производителя": fabrictId },
-      { "Оригинальный номер - Идентификатор": fabrictId },
+      {
+        "Каталожный номер производителя": {
+          $regex: "^" + fabrictId,
+          $options: "ix",
+        },
+      },
+      {
+        "Оригинальный номер - Идентификатор": {
+          $regex: "^" + fabrictId,
+          $options: "ix",
+        },
+      },
+      {
+        "Каталожный номер производителя": {
+          $regex: fabrictId + "$",
+          $options: "ix",
+        },
+      },
+      {
+        "Оригинальный номер - Идентификатор": {
+          $regex: fabrictId + "$",
+          $options: "ix",
+        },
+      },
     ],
   }).exec();
 
