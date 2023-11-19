@@ -31,10 +31,10 @@ const product_get = (req, res) => {
     });
 };
 const product_getByFabricOrOriginalId = async (req, res) => {
-   const { fabrictId } = req.params;
-  const data = await Contact.find({
-    ["Каталожный номер производителя"]: fabrictId,
-  });
+  const { fabrictId } = req.params;
+  const data = await Product.find({
+    "Каталожный номер производителя": fabrictId,
+  }).exec();
   if (!data) notFound404(fabrictId);
   success200(res, data);
 };

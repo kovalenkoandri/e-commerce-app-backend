@@ -1,15 +1,20 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+collation = {
+  'locale': 'ru', //# use rus as the language
+  'strength': 2, //# ignore case and diacritics, such as accents
+  'caseLevel': false, //# do not distinguish between base characters and case variants
+  'caseFirst': 'off' //# do not sort uppercase before lowercase or vice versa
+}
 const productSchemaAvtoNova = new Schema(
   {
-    'Автомобильный бренд': {
+    "Автомобильный бренд": {
       type: String,
     },
-    'Оригинальный номер - Идентификатор': {
+    "Оригинальный номер - Идентификатор": {
       type: String,
     },
-    'Каталожный номер производителя': {
+    "Каталожный номер производителя": {
       type: String,
     },
     Производитель: {
@@ -18,59 +23,59 @@ const productSchemaAvtoNova = new Schema(
     Наименование: {
       type: String,
     },
-    'Наличие шт': {
+    "Наличие шт": {
       type: String,
     },
-    'Наличие\nЛьвов, шт': {
+    "Наличие\nЛьвов, шт": {
       type: String,
     },
-    'Наличие\nЧерновцы, шт': {
+    "Наличие\nЧерновцы, шт": {
       type: String,
     },
-    'Наличие\nИвано-Франковск, шт': {
+    "Наличие\nИвано-Франковск, шт": {
       type: String,
     },
-    'Наличие\nУжгород, шт': {
+    "Наличие\nУжгород, шт": {
       type: String,
     },
-    'Наличие\nОдесса, шт': {
+    "Наличие\nОдесса, шт": {
       type: String,
     },
-    'Наличие\nКременчуг, шт': {
+    "Наличие\nКременчуг, шт": {
       type: String,
     },
-    'Наличие\nПолтава, шт': {
+    "Наличие\nПолтава, шт": {
       type: String,
     },
-    'Наличие\nДнепропетровск, шт': {
+    "Наличие\nДнепропетровск, шт": {
       type: String,
     },
-    'Наличие\nХарьков, шт': {
+    "Наличие\nХарьков, шт": {
       type: String,
     },
-    'Наличие\nТернополь, шт': {
+    "Наличие\nТернополь, шт": {
       type: String,
     },
-    'Наличие\nЗапорожье, шт': {
+    "Наличие\nЗапорожье, шт": {
       type: String,
     },
-    'Наличие\nБелая Церковь, шт': {
+    "Наличие\nБелая Церковь, шт": {
       type: String,
     },
-    'Наличие\nКропивницький, шт': {
+    "Наличие\nКропивницький, шт": {
       type: String,
     },
-    'Наличие\nЧеркассыы, шт': {
+    "Наличие\nЧеркассыы, шт": {
       type: String,
     },
     Цена: {
       type: String,
     },
-    'Цена Розница': {
+    "Цена Розница": {
       type: String,
     },
   },
-  { timestamps: true },
+  { timestamps: true, collation: collation },
 );
 const Product = mongoose.model('product5', productSchemaAvtoNova);
 
