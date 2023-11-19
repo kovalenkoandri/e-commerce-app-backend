@@ -32,7 +32,6 @@ const product_get = (req, res) => {
 };
 const product_getByFabricOrOriginalId = async (req, res) => {
   const { fabrictId } = req.params;
-  console.log(fabrictId);
   const data = await Product.find({
     $or: [
       { "Каталожный номер производителя": fabrictId },
