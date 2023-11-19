@@ -4,7 +4,8 @@ const orderController = require('../controllers/controller.order');
 const verifyToken = require('../middlewares/verifytoken');
 
 router.get('/', verifyToken, orderController.order_get);
-router.post('/post', verifyToken, orderController.order_post);
+// router.post('/post', verifyToken, orderController.order_post);
+router.post('/post',  orderController.order_postAvtoNova);
 router.patch('/:id', verifyToken, orderController.order_update);
 
 module.exports = router;
