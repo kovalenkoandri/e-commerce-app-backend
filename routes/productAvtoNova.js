@@ -4,6 +4,7 @@ const { upload, resize } = require("../middlewares/upload");
 const productController = require("../controllers/controller.productAvtoNova");
 
 router.get("/", productController.product_get);
+router.get("/:id", productController.product_getByFabricOrOriginalId);
 
 //post
 router.post(

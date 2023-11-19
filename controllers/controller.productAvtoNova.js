@@ -1,4 +1,5 @@
 const Product = require("../models/productAvtoNova");
+const { success200, notFound404 } = require("../helpers");
 
 const product_get = (req, res) => {
   let page = parseInt(req.query.page) || 0; //for next page pass 1 here
@@ -28,6 +29,14 @@ const product_get = (req, res) => {
         });
       });
     });
+};
+const product_getByFabricOrOriginalId = async (req, res) => {
+   const { fabrictId } = req.params;
+  const data = await Contact.find({
+    ["Каталожный номер производителя"]: fabrictId,
+  });
+  if (!data) notFound404(fabrictId);
+  success200(res, data);
 };
 
 const product_post = (req, res) => {
@@ -159,6 +168,7 @@ const product_delete = (req, res) => {
 
 module.exports = {
   product_get,
+  product_getByFabricOrOriginalId,
   product_post,
   product_update,
   product_delete,
