@@ -94,15 +94,15 @@ const order_postAvtoNova = async (req, res) => {
       content: null,
     });
   }
-
   const order = new OrderAvtoNova(req.body.orderInfo);
   try {
     const resOrder = await order.save();
-    sendEmail(resOrder);
+    const populatedOrder = await resOrder.populate("product");
+    sendEmail(populatedOrder);
     res.status(200).send({
       status: "OK",
       message: "Added Order Successfully",
-      content: resOrder,
+      content: populatedOrder,
     });
   } catch (err) {
     return res.status(400).send({
