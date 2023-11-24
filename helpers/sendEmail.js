@@ -9,20 +9,20 @@ const nodemailerConfig = {
   secure: false,
   ignoreTLS: true,
   auth: {
-    user: "SENDER_EMAIL",
+    user: SENDER_EMAIL,
     pass: SENDINBLUE,
   },
 };
 
 const transporter = nodemailer.createTransport(nodemailerConfig);
 
-const sendEmail = async (toMail, verificationToken) => {
+const sendEmail = async (cartData) => {
   const email = {
-    to: toMail,
-    from: "SENDER_EMAIL",
+    to: SENDER_EMAIL,
+    from: SENDER_EMAIL,
     subject: "Message title",
     text: "Plaintext version of the message",
-    html: `<a target="_blank" href="http://localhost:4000/api/users/verify/${verificationToken}">Подтвердить email</a>`,
+    html: `<div>cartData ${cartData}</div>`,
   };
   await transporter.sendMail(email);
 };
