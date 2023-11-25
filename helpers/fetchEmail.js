@@ -1,27 +1,73 @@
-const Pop3Command = require("node-pop3");
-
+var Imap = require("node-imap"),
+  inspect = require("util").inspect;
+var fs = require("fs"),
+  fileStream;
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
   POP3_CLIENT_PASSWORD,
   POP3_CLIENT_USERNAME,
 } = process.env;
-const pop3 = new Pop3Command({
-  user: POP3_CLIENT_USERNAME,
-  password: POP3_CLIENT_PASSWORD,
-  host: POP3_CLIENT_HOST,
-  port: POP3_CLIENT_PORT,
-  tls: true,
-});
 
 const fetchEmail = async () => {
-  const str = await pop3.RETR(2);
-  // const str = await pop3.TOP(1250);
-  console.log(str);
-  // deal with mail string
-  // const list = await pop3.UIDL(276);
-  // console.dir(list);
-  await pop3.QUIT();
+  var imap = new Imap({
+    user: POP3_CLIENT_USERNAME,
+    password: POP3_CLIENT_PASSWORD,
+    host: POP3_CLIENT_HOST,
+    port: POP3_CLIENT_PORT,
+    tls: true,
+  });
+  function openInbox(cb) {
+    imap.openBox("INBOX", true, cb);
+  }
+  imap.once("ready", function () {
+    openInbox(function (err, box) {
+      if (err) throw err;
+      var f = imap.seq.fetch("1:3", {
+        bodies: "HEADER.FIELDS (FROM TO SUBJECT DATE)",
+        struct: true,
+      });
+      f.on("message", function (msg, seqno) {
+        console.log("Message #%d", seqno);
+        var prefix = "(#" + seqno + ") ";
+        msg.on("body", function (stream, info) {
+          var buffer = "";
+          stream.on("data", function (chunk) {
+            buffer += chunk.toString("utf8");
+          });
+          stream.once("end", function () {
+            console.log(
+              prefix + "Parsed header: %s",
+              inspect(Imap.parseHeader(buffer)),
+            );
+          });
+        });
+        msg.once("attributes", function (attrs) {
+          console.log(prefix + "Attributes: %s", inspect(attrs, false, 8));
+        });
+        msg.once("end", function () {
+          console.log(prefix + "Finished");
+        });
+      });
+      f.once("error", function (err) {
+        console.log("Fetch error: " + err);
+      });
+      f.once("end", function () {
+        console.log("Done fetching all messages!");
+        imap.end();
+      });
+    });
+  });
+
+  imap.once("error", function (err) {
+    console.log(err);
+  });
+
+  imap.once("end", function () {
+    console.log("Connection ended");
+  });
+  imap.connect();
+
 };
 fetchEmail();
 module.exports = fetchEmail;
