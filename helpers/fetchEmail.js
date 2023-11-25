@@ -1,7 +1,6 @@
-var Imap = require("node-imap"),
-  inspect = require("util").inspect;
-var fs = require("fs"),
-  fileStream;
+var Imap = require("node-imap");
+var fs = require("fs");
+  const moment = require('moment');
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -17,44 +16,41 @@ const fetchEmail = async () => {
     port: POP3_CLIENT_PORT,
     tls: true,
   });
+  const yesterday = moment().subtract(1, "days").toDate();
   function openInbox(cb) {
     imap.openBox("INBOX", true, cb);
   }
+
   imap.once("ready", function () {
     openInbox(function (err, box) {
       if (err) throw err;
-      var f = imap.seq.fetch("1:3", {
-        bodies: "HEADER.FIELDS (FROM TO SUBJECT DATE)",
-        struct: true,
-      });
-      f.on("message", function (msg, seqno) {
-        console.log("Message #%d", seqno);
-        var prefix = "(#" + seqno + ") ";
-        msg.on("body", function (stream, info) {
-          var buffer = "";
-          stream.on("data", function (chunk) {
-            buffer += chunk.toString("utf8");
+
+      imap.search(["UNSEEN", ["SINCE", yesterday]], function (err, results) {
+        if (err) throw err;
+
+        const fetch = imap.fetch(results, { bodies: "" });
+
+        fetch.on("message", function (msg, seqno) {
+          msg.on("body", function (stream, info) {
+            // Use a library like 'mailparser' to parse the email and extract attachments
+            // Here's a basic example using 'mailparser':
+            const simpleParser = require("mailparser").simpleParser;
+
+            simpleParser(stream, (err, mail) => {
+              if (err) throw err;
+
+              mail.attachments.forEach((attachment) => {
+                // Download attachments to a file
+                fs.writeFileSync(attachment.filename, attachment.content);
+                console.log(`Downloaded attachment: ${attachment.filename}`);
+              });
+            });
           });
-          stream.once("end", function () {
-            console.log(
-              prefix + "Parsed header: %s",
-              inspect(Imap.parseHeader(buffer)),
-            );
-          });
         });
-        msg.once("attributes", function (attrs) {
-          console.log(prefix + "Attributes: %s", inspect(attrs, false, 8));
+
+        fetch.on("end", function () {
+          imap.end();
         });
-        msg.once("end", function () {
-          console.log(prefix + "Finished");
-        });
-      });
-      f.once("error", function (err) {
-        console.log("Fetch error: " + err);
-      });
-      f.once("end", function () {
-        console.log("Done fetching all messages!");
-        imap.end();
       });
     });
   });
@@ -66,6 +62,7 @@ const fetchEmail = async () => {
   imap.once("end", function () {
     console.log("Connection ended");
   });
+
   imap.connect();
 
 };
