@@ -1,6 +1,5 @@
 var Imap = require("node-imap");
 var fs = require("fs");
-const moment = require("moment");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -18,8 +17,9 @@ const fetchEmail = async () => {
     tls: true,
   });
   function openInbox(cb) {
-    imap.openBox("INBOX", true, cb);
+    imap.openBox("INBOX", false, cb); // Set readOnly to false to allow modifications
   }
+
   imap.once("ready", function () {
     openInbox(function (err, box) {
       if (err) throw err;
@@ -53,12 +53,21 @@ const fetchEmail = async () => {
                       `Downloaded attachment: ${attachment.filename}`,
                     );
                   });
+
+                  // Move the email to the Trash
+                  imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
+                    if (err) throw err;
+                    console.log("Moved email to Trash");
+
+                    // Expunge the mailbox to permanently remove the deleted email
+                    imap.expunge(function (err) {
+                      if (err) throw err;
+                      console.log("Expunged mailbox");
+                      imap.end();
+                    });
+                  });
                 });
               });
-            });
-
-            fetch.on("end", function () {
-              imap.end();
             });
           } else {
             console.log("No unread emails with the specified subject found.");
