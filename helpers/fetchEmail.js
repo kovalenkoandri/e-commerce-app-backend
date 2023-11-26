@@ -1,5 +1,5 @@
-var Imap = require("node-imap");
-var fs = require("fs");
+const Imap = require("node-imap");
+const fs = require("fs");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -8,8 +8,9 @@ const {
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
 let latestEmailUID = null;
+let attachmentFilename;
 const fetchEmail = async () => {
-  var imap = new Imap({
+  const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
     password: POP3_CLIENT_PASSWORD,
     host: POP3_CLIENT_HOST,
@@ -48,7 +49,8 @@ const fetchEmail = async () => {
 
                   mail.attachments.forEach((attachment) => {
                     // Download attachments to a file
-                    fs.writeFileSync(attachment.filename, attachment.content);
+                    attachmentFilename = attachment.filename;
+                    fs.writeFileSync(attachmentFilename, attachment.content);
                     console.log(
                       `Downloaded attachment: ${attachment.filename}`,
                     );
@@ -87,6 +89,12 @@ const fetchEmail = async () => {
   });
 
   imap.connect();
+  
 };
-fetchEmail();
-module.exports = fetchEmail;
+// fetchEmail();
+const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
+
+// Set up the interval
+const fetchEmailInterval = setInterval(fetchEmail, millisecondsIn24Hours);
+
+module.exports = fetchEmailInterval;
