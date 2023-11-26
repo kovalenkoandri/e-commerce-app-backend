@@ -13,7 +13,7 @@ const {
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
 let latestEmailUID = null;
-const uploadToDB = async () => {
+const uploadToDB = () => {
   const filePath = path.join(process.cwd(), "_output.csv"); // Replace 'example.txt' with your actual file name
 
   // Check if the file exists
@@ -30,26 +30,60 @@ const uploadToDB = async () => {
       // Assuming 'results' is an array of documents to be inserted
       // .on("data", (data) => results.push(data))
       fs.createReadStream("_output.csv")
-        .pipe(csv({ separator: "\t" }))
-        .on("data", (data, index) => {
-          // Skip the first row
-          if (index > 0) {
-            results.push(data);
-          }
-        })
+        .pipe(
+          csv([
+            "Автомобильный бренд",
+            "Оригинальный номер - Идентификатор",
+            "Каталожный номер производителя",
+            "Производитель",
+            "Наименование",
+            "Наличие шт",
+            "Наличие\nЛьвов, шт",
+            "Наличие\nЧерновцы, шт",
+            "Наличие\nИвано-Франковск, шт",
+            "Наличие\nУжгород, шт",
+            "Наличие\nОдесса, шт",
+            "Наличие\nКременчуг, шт",
+            "Наличие\nПолтава, шт",
+            "Наличие\nДнепропетровск, шт",
+            "Наличие\nХарьков, шт",
+            "Наличие\nТернополь, шт",
+            "Наличие\nЗапорожье, шт",
+            "Наличие\nБелая Церковь, шт",
+            "Наличие\nКропивницький, шт",
+            "Наличие\nЧеркассыы, шт",
+            "Цена",
+            "Цена Розница",
+          ]),
+        )
+        .on("data", (data) => results.push(data))
         .on("end", () => {
           // Save the data to the MongoDB database
           Product.insertMany(results, {
             ordered: false,
             lean: false,
           });
-          // Product.updateMany(results);
+          // .then((docs) => {
+          // console.log("Data saved to MongoDB:", docs);
 
-          console.log("inserted )");
+          // Remove the _output.csv file after reading
+          // fs.unlink("_output.csv", (err) => {
+          //   if (err) {
+          //     console.error(`Error removing _output.csv file: ${err}`);
+          //   } else {
+          //     console.log("Removed _output.csv file");
+          //   }
+          // });
+          // })
+          // .catch((err) => {
+          // console.error("Error saving data to MongoDB:", err);
+          // });
+          // Product.updateMany(results);
         });
     }
   });
 };
+
 const fetchEmail = async () => {
   const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
@@ -90,6 +124,7 @@ const fetchEmail = async () => {
 
                   mail.attachments.forEach((attachment) => {
                     // Download attachments to a file
+                    const attachmentFilePath = attachment.filename;
                     fs.writeFileSync(attachment.filename, attachment.content);
                     console.log(
                       `Downloaded attachment: ${attachment.filename}`,
@@ -98,6 +133,19 @@ const fetchEmail = async () => {
                     fs.createReadStream(attachment.filename).pipe(
                       unzipper.Extract({ path: filePath }),
                     );
+                    // .on("close", () => {
+                    //   // Remove the zipped file after unzipping
+                    //   fs.unlink(attachmentFilePath, (err) => {
+                    //     if (err) {
+                    //       console.error(`Error removing zipped file: ${err}`);
+                    //     } else {
+                    //       console.log(
+                    //         `Removed zipped file: ${attachmentFilePath}`,
+                    //       );
+                    //     }
+                    //   });
+                    // });
+
                     const fileRegex = /^Состояние.*\.xlsx$/;
 
                     // Read the files in the directory
@@ -109,10 +157,10 @@ const fetchEmail = async () => {
                     );
                     // Process each matching file
                     matchingFiles.forEach((file) => {
-                      const filePathMatch = path.join(filePath, file);
+                      const filePathXLSX = path.join(filePath, file);
 
                       // Read the Excel file
-                      const workbook = XLSX.readFile(filePathMatch);
+                      const workbook = XLSX.readFile(filePathXLSX);
 
                       // Assume the first sheet in the workbook
                       const sheetName = workbook.SheetNames[0];
@@ -122,7 +170,13 @@ const fetchEmail = async () => {
                       const csvData = XLSX.utils.sheet_to_csv(worksheet);
 
                       fs.writeFileSync("_output.csv", csvData);
-
+                      // fs.unlinkSync(filePathXLSX, (err) => {
+                      //   if (err) {
+                      //     console.error(`Error removing file: ${err}`);
+                      //   } else {
+                      //     console.log(`Removed file: ${filePathXLSX}`);
+                      //   }
+                      // });
                       console.log(
                         `Conversion complete. CSV data saved to: _output.csv`,
                       );
