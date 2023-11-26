@@ -20,61 +20,80 @@ const fetchEmail = async () => {
     imap.openBox("INBOX", false, cb); // Set readOnly to false to allow modifications
   }
 
-  imap.once("ready", function () {
-    openInbox(function (err, box) {
+  function listMailboxes(cb) {
+    imap.getBoxes(function (err, boxes) {
       if (err) throw err;
 
-      imap.search(
-        ["UNSEEN", ["HEADER", "SUBJECT", searchTerm]],
-        function (err, results) {
-          if (err) throw err;
+      console.log("Available mailboxes:");
+      for (const box in boxes) {
+        console.log(box);
+      }
 
-          // Find the UID of the newest email
-          if (results.length > 0) {
-            latestEmailUID = Math.max(...results);
-          }
+      cb();
+    });
+  }
 
-          if (latestEmailUID) {
-            const fetch = imap.fetch(latestEmailUID, { bodies: "" });
+  imap.once("ready", function () {
+    listMailboxes(function () {
+      openInbox(function (err, box) {
+        if (err) throw err;
 
-            fetch.on("message", function (msg, seqno) {
-              msg.on("body", function (stream, info) {
-                // Use a library like 'mailparser' to parse the email and extract attachments
-                // Here's a basic example using 'mailparser':
-                const simpleParser = require("mailparser").simpleParser;
+        imap.search(
+          ["UNSEEN", ["HEADER", "SUBJECT", searchTerm]],
+          function (err, results) {
+            if (err) throw err;
 
-                simpleParser(stream, (err, mail) => {
-                  if (err) throw err;
+            // Find the UID of the newest email
+            if (results.length > 0) {
+              latestEmailUID = Math.max(...results);
+            }
 
-                  mail.attachments.forEach((attachment) => {
-                    // Download attachments to a file
-                    fs.writeFileSync(attachment.filename, attachment.content);
-                    console.log(
-                      `Downloaded attachment: ${attachment.filename}`,
-                    );
-                  });
+            if (latestEmailUID) {
+              const fetch = imap.fetch(latestEmailUID, { bodies: "" });
 
-                  // Move the email to the Trash
-                  imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
+              fetch.on("message", function (msg, seqno) {
+                msg.on("body", function (stream, info) {
+                  // Use a library like 'mailparser' to parse the email and extract attachments
+                  // Here's a basic example using 'mailparser':
+                  const simpleParser = require("mailparser").simpleParser;
+
+                  simpleParser(stream, (err, mail) => {
                     if (err) throw err;
-                    console.log("Moved email to Trash");
 
-                    // Expunge the mailbox to permanently remove the deleted email
-                    imap.expunge(function (err) {
-                      if (err) throw err;
-                      console.log("Expunged mailbox");
-                      imap.end();
+                    mail.attachments.forEach((attachment) => {
+                      // Download attachments to a file
+                      fs.writeFileSync(attachment.filename, attachment.content);
+                      console.log(
+                        `Downloaded attachment: ${attachment.filename}`,
+                      );
                     });
+
+                    // Move the email to the Trash
+                    imap.move(
+                      [latestEmailUID],
+                      "[Gmail]/Trash",
+                      function (err) {
+                        if (err) throw err;
+                        console.log("Moved email to Trash");
+
+                        // Expunge the mailbox to permanently remove the deleted email
+                        imap.expunge(function (err) {
+                          if (err) throw err;
+                          console.log("Expunged mailbox");
+                          imap.end();
+                        });
+                      },
+                    );
                   });
                 });
               });
-            });
-          } else {
-            console.log("No unread emails with the specified subject found.");
-            imap.end();
-          }
-        },
-      );
+            } else {
+              console.log("No unread emails with the specified subject found.");
+              imap.end();
+            }
+          },
+        );
+      });
     });
   });
 
