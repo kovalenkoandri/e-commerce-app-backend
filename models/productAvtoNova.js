@@ -77,6 +77,6 @@ const productSchemaAvtoNova = new Schema(
   },
   { timestamps: true, collation: collation },
 );
-const Product = mongoose.model('allproducts', productSchemaAvtoNova);
+const Product = mongoose.model('allproductsync', productSchemaAvtoNova);
 
 module.exports = Product;

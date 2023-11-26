@@ -3,6 +3,8 @@ const fs = require("fs");
 const unzipper = require("unzipper");
 const path = require("path");
 const XLSX = require("xlsx");
+const csv = require("csv-parser");
+const Product = require("../models/productAvtoNova");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -11,7 +13,43 @@ const {
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
 let latestEmailUID = null;
-// let attachmentFilename;
+const uploadToDB = async () => {
+  const filePath = path.join(process.cwd(), "_output.csv"); // Replace 'example.txt' with your actual file name
+
+  // Check if the file exists
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error(`File does not exist: ${filePath}`);
+      // Handle the case where the file does not exist
+    } else {
+      // The file exists, so you can run your code here
+      console.log(`File exists: ${filePath}`);
+
+      const results = [];
+
+      // Assuming 'results' is an array of documents to be inserted
+      // .on("data", (data) => results.push(data))
+      fs.createReadStream("_output.csv")
+        .pipe(csv({ separator: "\t" }))
+        .on("data", (data, index) => {
+          // Skip the first row
+          if (index > 0) {
+            results.push(data);
+          }
+        })
+        .on("end", () => {
+          // Save the data to the MongoDB database
+          Product.insertMany(results, {
+            ordered: false,
+            lean: false,
+          });
+          // Product.updateMany(results);
+
+          console.log("inserted )");
+        });
+    }
+  });
+};
 const fetchEmail = async () => {
   const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
@@ -82,7 +120,7 @@ const fetchEmail = async () => {
 
                       // Convert the worksheet to CSV
                       const csvData = XLSX.utils.sheet_to_csv(worksheet);
-                      
+
                       fs.writeFileSync("_output.csv", csvData);
 
                       console.log(
@@ -90,6 +128,7 @@ const fetchEmail = async () => {
                       );
                     });
                   });
+                  uploadToDB();
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
                     if (err) throw err;
@@ -124,6 +163,7 @@ const fetchEmail = async () => {
 
   imap.connect();
 };
+
 fetchEmail();
 const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
 
