@@ -2,6 +2,7 @@ const Imap = require("node-imap");
 const fs = require("fs");
 const unzipper = require("unzipper");
 const path = require("path");
+const XLSX = require("xlsx");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -58,6 +59,30 @@ const fetchEmail = async () => {
                     const filePath = path.join(process.cwd(), "unzipped");
                     fs.createReadStream(attachment.filename).pipe(
                       unzipper.Extract({ path: filePath }),
+                    );
+                    // Define the path to your Excel file
+                    const excelFilePath = path.join(
+                      filePath,
+                      "Состояние*.xlsx",
+                    );
+
+                    // Read the Excel file
+                    const workbook = XLSX.readFile(excelFilePath);
+
+                    // Assume the first sheet in the workbook
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    // Convert the worksheet to CSV
+                    const csvData = XLSX.utils.sheet_to_csv(worksheet);
+
+                    // Save the CSV data to a file
+                    const csvFilePath = path.join(__dirname, "output.csv");
+                    fs.writeFileSync(csvFilePath, csvData);
+
+                    console.log(
+                      "Conversion complete. CSV data saved to:",
+                      csvFilePath,
                     );
                   });
 
