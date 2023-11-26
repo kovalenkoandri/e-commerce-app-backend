@@ -60,32 +60,36 @@ const fetchEmail = async () => {
                     fs.createReadStream(attachment.filename).pipe(
                       unzipper.Extract({ path: filePath }),
                     );
-                    // Define the path to your Excel file
-                    const excelFilePath = path.join(
-                      filePath,
-                      "Состояние*.xlsx",
+                    const fileRegex = /^Состояние.*\.xlsx$/;
+
+                    // Read the files in the directory
+                    const files = fs.readdirSync(filePath);
+
+                    // Filter files based on the regular expression
+                    const matchingFiles = files.filter((file) =>
+                      fileRegex.test(file),
                     );
+                    // Process each matching file
+                    matchingFiles.forEach((file) => {
+                      const filePathMatch = path.join(filePath, file);
 
-                    // Read the Excel file
-                    const workbook = XLSX.readFile(excelFilePath);
+                      // Read the Excel file
+                      const workbook = XLSX.readFile(filePathMatch);
 
-                    // Assume the first sheet in the workbook
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
+                      // Assume the first sheet in the workbook
+                      const sheetName = workbook.SheetNames[0];
+                      const worksheet = workbook.Sheets[sheetName];
 
-                    // Convert the worksheet to CSV
-                    const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                      // Convert the worksheet to CSV
+                      const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                      
+                      fs.writeFileSync("_output.csv", csvData);
 
-                    // Save the CSV data to a file
-                    const csvFilePath = path.join(__dirname, "output.csv");
-                    fs.writeFileSync(csvFilePath, csvData);
-
-                    console.log(
-                      "Conversion complete. CSV data saved to:",
-                      csvFilePath,
-                    );
+                      console.log(
+                        `Conversion complete. CSV data saved to: _output.csv`,
+                      );
+                    });
                   });
-
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
                     if (err) throw err;

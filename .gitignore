@@ -31,3 +31,4 @@ package-lock.json*
 .env
 Состояние*
 helpers/output.csv
+_output.csv
