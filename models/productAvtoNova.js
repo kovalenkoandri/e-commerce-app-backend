@@ -8,6 +8,7 @@ collation = {
 }
 const productSchemaAvtoNova = new Schema(
   {
+    _id: String,
     "Автомобильный бренд": {
       type: String,
     },

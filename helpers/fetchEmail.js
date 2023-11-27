@@ -14,7 +14,7 @@ const {
 const searchTerm = "Состояние"; // The word to search for in the subject
 let latestEmailUID = null;
 const uploadToDB = () => {
-  const filePath = path.join(process.cwd(), "_output.csv"); // Replace 'example.txt' with your actual file name
+  const filePath = path.join(process.cwd(), "_output.csv");
 
   // Check if the file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {
@@ -28,41 +28,79 @@ const uploadToDB = () => {
       const results = [];
 
       // Assuming 'results' is an array of documents to be inserted
-      // .on("data", (data) => results.push(data))
       fs.createReadStream("_output.csv")
         .pipe(
-          csv([
-            "Автомобильный бренд",
-            "Оригинальный номер - Идентификатор",
-            "Каталожный номер производителя",
-            "Производитель",
-            "Наименование",
-            "Наличие шт",
-            "Наличие\nЛьвов, шт",
-            "Наличие\nЧерновцы, шт",
-            "Наличие\nИвано-Франковск, шт",
-            "Наличие\nУжгород, шт",
-            "Наличие\nОдесса, шт",
-            "Наличие\nКременчуг, шт",
-            "Наличие\nПолтава, шт",
-            "Наличие\nДнепропетровск, шт",
-            "Наличие\nХарьков, шт",
-            "Наличие\nТернополь, шт",
-            "Наличие\nЗапорожье, шт",
-            "Наличие\nБелая Церковь, шт",
-            "Наличие\nКропивницький, шт",
-            "Наличие\nЧеркассыы, шт",
-            "Цена",
-            "Цена Розница",
-          ]),
+          csv({
+            skipLines: 2,
+            headers: [
+              "Автомобильный бренд",
+              "Оригинальный номер - Идентификатор",
+              "Каталожный номер производителя",
+              "Производитель",
+              "Наименование",
+              "Наличие шт",
+              "Наличие\nЛьвов, шт",
+              "Наличие\nЧерновцы, шт",
+              "Наличие\nИвано-Франковск, шт",
+              "Наличие\nУжгород, шт",
+              "Наличие\nОдесса, шт",
+              "Наличие\nКременчуг, шт",
+              "Наличие\nПолтава, шт",
+              "Наличие\nДнепропетровск, шт",
+              "Наличие\nХарьков, шт",
+              "Наличие\nТернополь, шт",
+              "Наличие\nЗапорожье, шт",
+              "Наличие\nБелая Церковь, шт",
+              "Наличие\nКропивницький, шт",
+              "Наличие\nЧеркассыы, шт",
+              "Цена",
+              "Цена Розница",
+            ],
+          }),
         )
-        .on("data", (data) => results.push(data))
-        .on("end", () => {
-          // Save the data to the MongoDB database
-          Product.insertMany(results, {
-            ordered: false,
-            lean: false,
+        .on("data", (row) => {
+          // Create a new document and set the _id field to someIdinternal value
+          const document = new Product({
+            _id: row["Каталожный номер производителя"],
+            "Автомобильный бренд": row["Автомобильный бренд"],
+            "Оригинальный номер - Идентификатор":
+              row["Оригинальный номер - Идентификатор"],
+            "Каталожный номер производителя":
+              row["Каталожный номер производителя"],
+            Производитель: row["Производитель"],
+            Наименование: row["Наименование"],
+            "Наличие шт": row["Наличие шт"],
+            "Наличие\nЛьвов, шт": row["Наличие\nЛьвов, шт"],
+            "Наличие\nЧерновцы, шт": row["Наличие\nЧерновцы, шт"],
+            "Наличие\nИвано-Франковск, шт": row["Наличие\nИвано-Франковск, шт"],
+            "Наличие\nУжгород, шт": row["Наличие\nУжгород, шт"],
+            "Наличие\nОдесса, шт": row["Наличие\nОдесса, шт"],
+            "Наличие\nКременчуг, шт": row["Наличие\nКременчуг, шт"],
+            "Наличие\nПолтава, шт": row["Наличие\nПолтава, шт"],
+            "Наличие\nДнепропетровск, шт": row["Наличие\nДнепропетровск, шт"],
+            "Наличие\nХарьков, шт": row["Наличие\nХарьков, шт"],
+            "Наличие\nТернополь, шт": row["Наличие\nТернополь, шт"],
+            "Наличие\nЗапорожье, шт": row["Наличие\nЗапорожье, шт"],
+            "Наличие\nБелая Церковь, шт": row["Наличие\nБелая Церковь, шт"],
+            "Наличие\nКропивницький, шт": row["Наличие\nКропивницький, шт"],
+            "Наличие\nЧеркассыы, шт": row["Наличие\nЧеркассыы, шт"],
+            Цена: row["Цена"],
+            "Цена Розница": row["Цена Розница"],
           });
+
+          // Save the document to MongoDB
+          document
+            .save()
+            .catch((error) => console.error("Error saving document:", error));
+
+          // .on("data", (data) => results.push(data))
+
+          // .on("end", () => {
+          //   // Save the data to the MongoDB database
+          //   Product.insertMany(results, {
+          //     ordered: false,
+          //     lean: false,
+          //   });
           // .then((docs) => {
           // console.log("Data saved to MongoDB:", docs);
 
@@ -79,6 +117,9 @@ const uploadToDB = () => {
           // console.error("Error saving data to MongoDB:", err);
           // });
           // Product.updateMany(results);
+        })
+        .on("end", () => {
+          console.log("CSV file successfully processed");
         });
     }
   });
