@@ -32,3 +32,6 @@ package-lock.json*
 Состояние*
 helpers/output.csv
 _output.csv
+.~lock._output.csv#
+_output2.csv
+.~lock._output2.csv#

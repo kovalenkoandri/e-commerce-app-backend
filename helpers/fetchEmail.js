@@ -13,9 +13,16 @@ const {
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
 let latestEmailUID = null;
+let attachmentFilePath = null;
+let filePathXLSX = null;
 const uploadToDB = () => {
   const filePath = path.join(process.cwd(), "_output.csv");
-
+  Product.collection.drop((err) => {
+    if (err) {
+      console.error("Error dropping collection:", err);
+      return;
+    }
+  });
   // Check if the file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {
     if (err) {
@@ -24,8 +31,6 @@ const uploadToDB = () => {
     } else {
       // The file exists, so you can run your code here
       console.log(`File exists: ${filePath}`);
-
-      const results = [];
 
       // Assuming 'results' is an array of documents to be inserted
       fs.createReadStream("_output.csv")
@@ -58,7 +63,7 @@ const uploadToDB = () => {
             ],
           }),
         )
-        .on("data", (row) => {
+        .on("data", async (row) => {
           // Create a new document and set the _id field to someIdinternal value
           const document = new Product({
             _id: row["Каталожный номер производителя"],
@@ -89,37 +94,46 @@ const uploadToDB = () => {
           });
 
           // Save the document to MongoDB
-          document
-            .save()
-            .catch((error) => console.error("Error saving document:", error));
-
-          // .on("data", (data) => results.push(data))
-
-          // .on("end", () => {
-          //   // Save the data to the MongoDB database
-          //   Product.insertMany(results, {
-          //     ordered: false,
-          //     lean: false,
-          //   });
-          // .then((docs) => {
-          // console.log("Data saved to MongoDB:", docs);
-
+          document.save(async (err, product) => {
+            if (err.code === 11000) {
+              //error for dupes
+              console.error(
+                "Duplicate blocked! " + err.keyValue._id,
+              );
+              await Product.deleteMany({
+                _id: row["Каталожный номер производителя"],
+              });
+            }
+            else if (err.code !== 11000) {
+              console.log(err);
+            }
+          });
+        })
+        .on("end", () => {
+          console.log("CSV file successfully processed");
           // Remove the _output.csv file after reading
-          // fs.unlink("_output.csv", (err) => {
+
+          // fs.unlink(attachmentFilePath, (err) => {
+          //   if (err) {
+          //     console.error(`Error removing zipped file: ${err}`);
+          //   } else {
+          //     console.log(`Removed zipped file: ${attachmentFilePath}`);
+          //   }
+          // });
+          // fs.unlink(filePathXLSX, (err) => {
+          //   if (err) {
+          //     console.error(`Error removing file: ${err}`);
+          //   } else {
+          //     console.log(`Removed file: ${filePathXLSX}`);
+          //   }
+          // });
+          // fs.unlinkSync("_output.csv", (err) => {
           //   if (err) {
           //     console.error(`Error removing _output.csv file: ${err}`);
           //   } else {
           //     console.log("Removed _output.csv file");
           //   }
           // });
-          // })
-          // .catch((err) => {
-          // console.error("Error saving data to MongoDB:", err);
-          // });
-          // Product.updateMany(results);
-        })
-        .on("end", () => {
-          console.log("CSV file successfully processed");
         });
     }
   });
@@ -162,16 +176,13 @@ const fetchEmail = async () => {
 
                 simpleParser(stream, (err, mail) => {
                   if (err) throw err;
-
                   mail.attachments.forEach((attachment) => {
+                    attachmentFilePath = attachment.filename;
                     // Download attachments to a file
-                    const attachmentFilePath = attachment.filename;
-                    fs.writeFileSync(attachment.filename, attachment.content);
-                    console.log(
-                      `Downloaded attachment: ${attachment.filename}`,
-                    );
+                    fs.writeFileSync(attachmentFilePath, attachment.content);
+                    console.log(`Downloaded attachment: ${attachmentFilePath}`);
                     const filePath = path.join(process.cwd(), "unzipped");
-                    fs.createReadStream(attachment.filename).pipe(
+                    fs.createReadStream(attachmentFilePath).pipe(
                       unzipper.Extract({ path: filePath }),
                     );
                     // .on("close", () => {
@@ -198,7 +209,7 @@ const fetchEmail = async () => {
                     );
                     // Process each matching file
                     matchingFiles.forEach((file) => {
-                      const filePathXLSX = path.join(filePath, file);
+                      filePathXLSX = path.join(filePath, file);
 
                       // Read the Excel file
                       const workbook = XLSX.readFile(filePathXLSX);
@@ -223,7 +234,6 @@ const fetchEmail = async () => {
                       );
                     });
                   });
-                  uploadToDB();
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
                     if (err) throw err;
@@ -257,6 +267,7 @@ const fetchEmail = async () => {
   });
 
   imap.connect();
+  uploadToDB();
 };
 
 fetchEmail();
