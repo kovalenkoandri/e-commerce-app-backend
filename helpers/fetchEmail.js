@@ -15,7 +15,7 @@ const searchTerm = "Состояние"; // The word to search for in the subjec
 let latestEmailUID = null;
 let attachmentFilePath = null;
 let filePathXLSX = null;
-const uploadToDB = () => {
+const uploadToDB = async () => {
   const filePath = path.join(process.cwd(), "_output.csv");
   Product.collection.drop((err) => {
     if (err) {
@@ -95,45 +95,57 @@ const uploadToDB = () => {
 
           // Save the document to MongoDB
           document.save(async (err, product) => {
-            if (err.code === 11000) {
+            if (err) {
               //error for dupes
-              console.error(
-                "Duplicate blocked! " + err.keyValue._id,
-              );
-              await Product.deleteMany({
-                _id: row["Каталожный номер производителя"],
-              });
-            }
-            else if (err.code !== 11000) {
-              console.log(err);
+              if (err.code === 11000) {
+                console.error("Duplicate blocked! " + err.keyValue._id);
+                await Product.deleteMany({
+                  _id: row["Каталожный номер производителя"],
+                });
+                // Product.aggregate([
+                //   {
+                //     $group: {
+                //       _id: null,
+                //       duplicates: {
+                //         $push: {
+                //           "Оригинальный номер - Идентификатор":
+                //             "$Оригинальный номер - Идентификатор",
+                //           // ... other fields ...
+                //         },
+                //       },
+                //       count: { $sum: 1 },
+                //     },
+                //   },
+                //   {
+                //     $match: {
+                //       count: { $gt: 1 },
+                //     },
+                //   },
+                // ]).exec((err, result) => {
+                //   if (err) {
+                //     console.error("Error finding duplicates:", err);
+                //   } else {
+                //     if (result.length > 0) {
+                //       console.log("Duplicates found:", result[0].duplicates);
+                //     } else {
+                //       console.log("No duplicates found.");
+                //     }
+                //   }
+                // });
+              }
             }
           });
         })
         .on("end", () => {
+          //   // Remove the _output.csv file after reading
+          //   // fs.unlink("_output.csv", (err) => {
+          //   //   if (err) {
+          //   //     console.error(`Error removing _output.csv file: ${err}`);
+          //   //   } else {
+          //   //     console.log("Removed _output.csv file");
+          //   //   }
+          //   // });
           console.log("CSV file successfully processed");
-          // Remove the _output.csv file after reading
-
-          // fs.unlink(attachmentFilePath, (err) => {
-          //   if (err) {
-          //     console.error(`Error removing zipped file: ${err}`);
-          //   } else {
-          //     console.log(`Removed zipped file: ${attachmentFilePath}`);
-          //   }
-          // });
-          // fs.unlink(filePathXLSX, (err) => {
-          //   if (err) {
-          //     console.error(`Error removing file: ${err}`);
-          //   } else {
-          //     console.log(`Removed file: ${filePathXLSX}`);
-          //   }
-          // });
-          // fs.unlinkSync("_output.csv", (err) => {
-          //   if (err) {
-          //     console.error(`Error removing _output.csv file: ${err}`);
-          //   } else {
-          //     console.log("Removed _output.csv file");
-          //   }
-          // });
         });
     }
   });
@@ -234,6 +246,7 @@ const fetchEmail = async () => {
                       );
                     });
                   });
+                  uploadToDB();
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
                     if (err) throw err;
@@ -263,14 +276,28 @@ const fetchEmail = async () => {
   });
 
   imap.once("end", function () {
+    // fs.unlink(attachmentFilePath, (err) => {
+    //   if (err) {
+    //     console.error(`Error removing zipped file: ${err}`);
+    //   } else {
+    //     console.log(`Removed zipped file: ${attachmentFilePath}`);
+    //   }
+    // });
+    // fs.unlink(filePathXLSX, (err) => {
+    //   if (err) {
+    //     console.error(`Error removing file: ${err}`);
+    //   } else {
+    //     console.log(`Removed file: ${filePathXLSX}`);
+    //   }
+    // });
     console.log("Connection ended");
   });
 
   imap.connect();
-  uploadToDB();
 };
 
 fetchEmail();
+
 const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
 
 // Set up the interval
