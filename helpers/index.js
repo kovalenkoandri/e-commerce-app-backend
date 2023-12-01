@@ -3,13 +3,13 @@ const notFound404 = require('./notFound404');
 const alreadyExists400 = require('./alreadyExists400');
 const sendEmail = require('./sendEmail');
 // const fetchEmailInterval = require("./fetchEmail");
-const aggregateDuplicates = require("./aggregateDuplicates");
+const removeDuplicates = require("./removeDuplicates");
 
 module.exports = {
   success200,
   notFound404,
   alreadyExists400,
   sendEmail,
-  aggregateDuplicates,
+  removeDuplicates,
   // fetchEmailInterval,
 };
