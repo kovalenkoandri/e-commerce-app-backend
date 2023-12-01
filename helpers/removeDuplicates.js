@@ -4,13 +4,12 @@ const Product = require("../models/productAvtoNova");
 const removeDuplicates = async () => {
   try {
     const duplicates = await findDuplicates();
-
     duplicates.forEach(async (duplicate) => {
-      const { _id } = duplicate;
-      await Product.findByIdAndDelete(_id);
+      for (let index = 0; index < duplicate.uniqueIds.length; index += 1) {
+        await Product.findOneAndDelete({ _id: duplicate.uniqueIds[index] });
+      }
     });
 
-    await findDuplicates();
     console.log("Duplicates removed successfully.");
   } catch (error) {
     console.error("Error removing duplicates:", error);
