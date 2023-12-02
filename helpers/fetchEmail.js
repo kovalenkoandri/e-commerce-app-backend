@@ -3,9 +3,8 @@ const fs = require("fs");
 const unzipper = require("unzipper");
 const path = require("path");
 const XLSX = require("xlsx");
-const csv = require("csv-parser");
-const Product = require("../models/productAvtoNova");
-const findDuplicates = require("./findDuplicates");
+const uploadToDB = require("./uploadToDB");
+
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -16,163 +15,8 @@ const searchTerm = "Состояние"; // The word to search for in the subjec
 let latestEmailUID = null;
 let attachmentFilePath = null;
 let filePathXLSX = null;
-let savedDocsCount = 0;
-const saveLimit = 3;
-const calculateSpecialPrice = async (row) => {
-  const numericPrice = parseFloat(row.replace(",", ""));
-  if (numericPrice >= 1 && numericPrice <= 100) {
-    return Number(numericPrice * 0.4 + numericPrice).toFixed(2);
-  } else if (numericPrice > 100 && numericPrice <= 150) {
-    return Number(numericPrice * 0.3 + numericPrice).toFixed(2);
-  } else if (numericPrice > 150 && numericPrice <= 250) {
-    return Number(numericPrice * 0.25 + numericPrice).toFixed(2);
-  } else if (numericPrice > 250 && numericPrice <= 370) {
-    return Number(numericPrice * 0.23 + numericPrice).toFixed(2);
-  } else if (numericPrice > 370 && numericPrice <= 500) {
-    return Number(numericPrice * 0.2 + numericPrice).toFixed(2);
-  } else if (numericPrice > 500 && numericPrice <= 700) {
-    return Number(numericPrice * 0.16 + numericPrice).toFixed(2);
-  } else if (numericPrice > 700 && numericPrice <= 1000) {
-    return Number(numericPrice * 0.14 + numericPrice).toFixed(2);
-  } else if (numericPrice > 1000 && numericPrice <= 2000) {
-    return Number(numericPrice * 0.11 + numericPrice).toFixed(2);
-  } else if (numericPrice > 2000 && numericPrice <= 3000) {
-    return Number(numericPrice * 0.09 + numericPrice).toFixed(2);
-  } else if (numericPrice > 3000 && numericPrice <= 4000) {
-    return Number(numericPrice * 0.08 + numericPrice).toFixed(2);
-  } else if (numericPrice > 4000 && numericPrice <= 5000) {
-    return Number(numericPrice * 0.07 + numericPrice).toFixed(2);
-  } else if (numericPrice > 5000 && numericPrice <= 7000) {
-    return Number(numericPrice * 0.06 + numericPrice).toFixed(2);
-  } else if (numericPrice > 7000 && numericPrice <= 10000) {
-    return Number(numericPrice * 0.05 + numericPrice).toFixed(2);
-  } else if (numericPrice > 10000 && numericPrice <= 20000) {
-    return Number(numericPrice * 0.04 + numericPrice).toFixed(2);
-  } else if (numericPrice > 20000 && numericPrice <= 30000) {
-    return Number(numericPrice * 0.03 + numericPrice).toFixed(2);
-  } else if (numericPrice > 40000 && numericPrice <= 50000) {
-    return Number(numericPrice * 0.02 + numericPrice).toFixed(2);
-  } else if (numericPrice > 50000) {
-    return Number(numericPrice * 0.015 + numericPrice).toFixed(2);
-  } else {
-    return "Помилкове значення";
-  }
-};
 
 const fetchEmail = async () => {
-  const filePath = path.join(process.cwd(), "_output.csv");
-  Product.collection.drop((err) => {
-    if (err) {
-      console.error("Error dropping collection:", err);
-      return;
-    }
-  });
-  // Check if the file exists
-  fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      console.error(`File does not exist: ${filePath}`);
-      // Handle the case where the file does not exist
-    } else {
-      // The file exists, so you can run your code here
-      console.log(`File exists: ${filePath}`);
-
-      // Assuming 'results' is an array of documents to be inserted
-      const readableStream = fs
-        .createReadStream("_output.csv")
-        .pipe(
-          csv({
-            skipLines: 2,
-            headers: [
-              "Автомобильный бренд",
-              "Оригинальный номер - Идентификатор",
-              "Каталожный номер производителя",
-              "Производитель",
-              "Наименование",
-              "Наличие шт",
-              "Наличие\nЛьвов, шт",
-              "Наличие\nЧерновцы, шт",
-              "Наличие\nИвано-Франковск, шт",
-              "Наличие\nУжгород, шт",
-              "Наличие\nОдесса, шт",
-              "Наличие\nКременчуг, шт",
-              "Наличие\nПолтава, шт",
-              "Наличие\nДнепропетровск, шт",
-              "Наличие\nХарьков, шт",
-              "Наличие\nТернополь, шт",
-              "Наличие\nЗапорожье, шт",
-              "Наличие\nБелая Церковь, шт",
-              "Наличие\nКропивницький, шт",
-              "Наличие\nЧеркассыы, шт",
-              "Цена",
-              "Цена Розница",
-            ],
-          }),
-        )
-        .on("data", async (row) => {
-          // if (savedDocsCount < saveLimit) {
-          const document = new Product({
-            _id: row["Каталожный номер производителя"],
-            "Автомобильный бренд": row["Автомобильный бренд"],
-            "Оригинальный номер - Идентификатор":
-              row["Оригинальный номер - Идентификатор"],
-            "Каталожный номер производителя":
-              row["Каталожный номер производителя"],
-            Производитель: row["Производитель"],
-            Наименование: row["Наименование"],
-            "Наличие шт": row["Наличие шт"],
-            "Наличие\nЛьвов, шт": row["Наличие\nЛьвов, шт"],
-            "Наличие\nЧерновцы, шт": row["Наличие\nЧерновцы, шт"],
-            "Наличие\nИвано-Франковск, шт": row["Наличие\nИвано-Франковск, шт"],
-            "Наличие\nУжгород, шт": row["Наличие\nУжгород, шт"],
-            "Наличие\nОдесса, шт": row["Наличие\nОдесса, шт"],
-            "Наличие\nКременчуг, шт": row["Наличие\nКременчуг, шт"],
-            "Наличие\nПолтава, шт": row["Наличие\nПолтава, шт"],
-            "Наличие\nДнепропетровск, шт": row["Наличие\nДнепропетровск, шт"],
-            "Наличие\nХарьков, шт": row["Наличие\nХарьков, шт"],
-            "Наличие\nТернополь, шт": row["Наличие\nТернополь, шт"],
-            "Наличие\nЗапорожье, шт": row["Наличие\nЗапорожье, шт"],
-            "Наличие\nБелая Церковь, шт": row["Наличие\nБелая Церковь, шт"],
-            "Наличие\nКропивницький, шт": row["Наличие\nКропивницький, шт"],
-            "Наличие\nЧеркассыы, шт": row["Наличие\nЧеркассыы, шт"],
-            Цена: row["Цена"],
-            "Цена спец": await calculateSpecialPrice(row["Цена"]),
-          });
-
-          // Save the document to MongoDB
-          document.save(async (err, product) => {
-            if (err) {
-              //error for dupes
-              if (err.code === 11000) {
-                console.error("Duplicate blocked! " + err.keyValue._id);
-                await Product.deleteMany({
-                  _id: row["Каталожный номер производителя"],
-                });
-              }
-            }
-          });
-          // savedDocsCount++;
-          // } else {
-          //   console.log(`Save limit reached. Not saving more documents.`);
-          //   readableStream.destroy(); // Stop reading the stream if limit is reached
-          // }
-        })
-        .on("end", async () => {
-          //   // Remove the _output.csv file after reading
-          //   // fs.unlink("_output.csv", (err) => {
-          //   //   if (err) {
-          //   //     console.error(`Error removing _output.csv file: ${err}`);
-          //   //   } else {
-          //   //     console.log("Removed _output.csv file");
-          //   //   }
-          //   // });
-          await findDuplicates();
-          console.log("CSV file successfully processed");
-        });
-    }
-  });
-};
-
-const fetchEmail1 = async () => {
   const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
     password: POP3_CLIENT_PASSWORD,
