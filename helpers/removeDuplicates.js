@@ -16,6 +16,4 @@ const removeDuplicates = async () => {
   }
 };
 
-removeDuplicates();
-
 module.exports = removeDuplicates;

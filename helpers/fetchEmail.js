@@ -5,6 +5,7 @@ const path = require("path");
 const XLSX = require("xlsx");
 const csv = require("csv-parser");
 const Product = require("../models/productAvtoNova");
+const findDuplicates = require("./findDuplicates");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -15,7 +16,18 @@ const searchTerm = "Состояние"; // The word to search for in the subjec
 let latestEmailUID = null;
 let attachmentFilePath = null;
 let filePathXLSX = null;
-const uploadToDB = async () => {
+let savedDocsCount = 0;
+const saveLimit = 100;
+const calculateSpecialPrice = async (row) => {
+  const numericPrice = parseFloat(row.replace(",", ""));
+  if (numericPrice < 100) {
+    return Number(numericPrice * 0.1 + numericPrice).toFixed(2);
+  } else {
+    return Number(numericPrice * 0.01 + numericPrice).toFixed(2);
+  }
+};
+
+const fetchEmail = async () => {
   const filePath = path.join(process.cwd(), "_output.csv");
   Product.collection.drop((err) => {
     if (err) {
@@ -33,7 +45,8 @@ const uploadToDB = async () => {
       console.log(`File exists: ${filePath}`);
 
       // Assuming 'results' is an array of documents to be inserted
-      fs.createReadStream("_output.csv")
+      const readableStream = fs
+        .createReadStream("_output.csv")
         .pipe(
           csv({
             skipLines: 2,
@@ -65,78 +78,61 @@ const uploadToDB = async () => {
         )
         .on("data", async (row) => {
           // Create a new document and set the _id field to someIdinternal value
-          const document = new Product({
-            _id: row["Каталожный номер производителя"],
-            "Автомобильный бренд": row["Автомобильный бренд"],
-            "Оригинальный номер - Идентификатор":
-              row["Оригинальный номер - Идентификатор"],
-            "Каталожный номер производителя":
-              row["Каталожный номер производителя"],
-            Производитель: row["Производитель"],
-            Наименование: row["Наименование"],
-            "Наличие шт": row["Наличие шт"],
-            "Наличие\nЛьвов, шт": row["Наличие\nЛьвов, шт"],
-            "Наличие\nЧерновцы, шт": row["Наличие\nЧерновцы, шт"],
-            "Наличие\nИвано-Франковск, шт": row["Наличие\nИвано-Франковск, шт"],
-            "Наличие\nУжгород, шт": row["Наличие\nУжгород, шт"],
-            "Наличие\nОдесса, шт": row["Наличие\nОдесса, шт"],
-            "Наличие\nКременчуг, шт": row["Наличие\nКременчуг, шт"],
-            "Наличие\nПолтава, шт": row["Наличие\nПолтава, шт"],
-            "Наличие\nДнепропетровск, шт": row["Наличие\nДнепропетровск, шт"],
-            "Наличие\nХарьков, шт": row["Наличие\nХарьков, шт"],
-            "Наличие\nТернополь, шт": row["Наличие\nТернополь, шт"],
-            "Наличие\nЗапорожье, шт": row["Наличие\nЗапорожье, шт"],
-            "Наличие\nБелая Церковь, шт": row["Наличие\nБелая Церковь, шт"],
-            "Наличие\nКропивницький, шт": row["Наличие\nКропивницький, шт"],
-            "Наличие\nЧеркассыы, шт": row["Наличие\nЧеркассыы, шт"],
-            Цена: row["Цена"],
-            "Цена Розница": row["Цена Розница"],
-          });
+          if (savedDocsCount < saveLimit) {
+            const document = new Product({
+              _id: row["Каталожный номер производителя"],
+              "Автомобильный бренд": row["Автомобильный бренд"],
+              "Оригинальный номер - Идентификатор":
+                row["Оригинальный номер - Идентификатор"],
+              "Каталожный номер производителя":
+                row["Каталожный номер производителя"],
+              Производитель: row["Производитель"],
+              Наименование: row["Наименование"],
+              "Наличие шт": row["Наличие шт"],
+              "Наличие\nЛьвов, шт": row["Наличие\nЛьвов, шт"],
+              "Наличие\nЧерновцы, шт": row["Наличие\nЧерновцы, шт"],
+              "Наличие\nИвано-Франковск, шт":
+                row["Наличие\nИвано-Франковск, шт"],
+              "Наличие\nУжгород, шт": row["Наличие\nУжгород, шт"],
+              "Наличие\nОдесса, шт": row["Наличие\nОдесса, шт"],
+              "Наличие\nКременчуг, шт": row["Наличие\nКременчуг, шт"],
+              "Наличие\nПолтава, шт": row["Наличие\nПолтава, шт"],
+              "Наличие\nДнепропетровск, шт": row["Наличие\nДнепропетровск, шт"],
+              "Наличие\nХарьков, шт": row["Наличие\nХарьков, шт"],
+              "Наличие\nТернополь, шт": row["Наличие\nТернополь, шт"],
+              "Наличие\nЗапорожье, шт": row["Наличие\nЗапорожье, шт"],
+              "Наличие\nБелая Церковь, шт": row["Наличие\nБелая Церковь, шт"],
+              "Наличие\nКропивницький, шт": row["Наличие\nКропивницький, шт"],
+              "Наличие\nЧеркассыы, шт": row["Наличие\nЧеркассыы, шт"],
+              Цена: row["Цена"],
+              "Цена спец": await calculateSpecialPrice(row["Цена"]),
+              //   Number(
+              //   parseFloat(row["Цена"].replace(",", "")) * 0.01 +
+              //     parseFloat(row["Цена"].replace(",", "")),
+              // ).toFixed(2),
+              // "Цена Розница": row["Цена Розница"],
+            });
 
-          // Save the document to MongoDB
-          document.save(async (err, product) => {
-            if (err) {
-              //error for dupes
-              if (err.code === 11000) {
-                console.error("Duplicate blocked! " + err.keyValue._id);
-                await Product.deleteMany({
-                  _id: row["Каталожный номер производителя"],
-                });
-                // Product.aggregate([
-                //   {
-                //     $group: {
-                //       _id: null,
-                //       duplicates: {
-                //         $push: {
-                //           "Оригинальный номер - Идентификатор":
-                //             "$Оригинальный номер - Идентификатор",
-                //           // ... other fields ...
-                //         },
-                //       },
-                //       count: { $sum: 1 },
-                //     },
-                //   },
-                //   {
-                //     $match: {
-                //       count: { $gt: 1 },
-                //     },
-                //   },
-                // ]).exec((err, result) => {
-                //   if (err) {
-                //     console.error("Error finding duplicates:", err);
-                //   } else {
-                //     if (result.length > 0) {
-                //       console.log("Duplicates found:", result[0].duplicates);
-                //     } else {
-                //       console.log("No duplicates found.");
-                //     }
-                //   }
-                // });
+            // Save the document to MongoDB
+            document.save(async (err, product) => {
+              if (err) {
+                //error for dupes
+                if (err.code === 11000) {
+                  console.error("Duplicate blocked! " + err.keyValue._id);
+                  await Product.deleteMany({
+                    _id: row["Каталожный номер производителя"],
+                  });
+                }
               }
-            }
-          });
+              console.log(product);
+            });
+            savedDocsCount++;
+          } else {
+            console.log(`Save limit reached. Not saving more documents.`);
+            readableStream.destroy(); // Stop reading the stream if limit is reached
+          }
         })
-        .on("end", () => {
+        .on("end", async () => {
           //   // Remove the _output.csv file after reading
           //   // fs.unlink("_output.csv", (err) => {
           //   //   if (err) {
@@ -145,13 +141,14 @@ const uploadToDB = async () => {
           //   //     console.log("Removed _output.csv file");
           //   //   }
           //   // });
+          await findDuplicates();
           console.log("CSV file successfully processed");
         });
     }
   });
 };
 
-const fetchEmail = async () => {
+const fetchEmail1 = async () => {
   const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
     password: POP3_CLIENT_PASSWORD,

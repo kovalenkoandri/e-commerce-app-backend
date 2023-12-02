@@ -72,12 +72,15 @@ const productSchemaAvtoNova = new Schema(
     Цена: {
       type: String,
     },
+    "Цена спец": {
+      type: String,
+    },
     "Цена Розница": {
       type: String,
     },
   },
   { timestamps: true, collation: collation },
 );
-const Product = mongoose.model("uniqueproduct", productSchemaAvtoNova);
+const Product = mongoose.model("specialPrice", productSchemaAvtoNova);
 
 module.exports = Product;
