@@ -17,7 +17,7 @@ let latestEmailUID = null;
 let attachmentFilePath = null;
 let filePathXLSX = null;
 let savedDocsCount = 0;
-const saveLimit = 100;
+const saveLimit = 3;
 const calculateSpecialPrice = async (row) => {
   const numericPrice = parseFloat(row.replace(",", ""));
   if (numericPrice < 100) {
@@ -77,8 +77,7 @@ const fetchEmail = async () => {
           }),
         )
         .on("data", async (row) => {
-          // Create a new document and set the _id field to someIdinternal value
-          if (savedDocsCount < saveLimit) {
+          // if (savedDocsCount < saveLimit) {
             const document = new Product({
               _id: row["Каталожный номер производителя"],
               "Автомобильный бренд": row["Автомобильный бренд"],
@@ -106,11 +105,6 @@ const fetchEmail = async () => {
               "Наличие\nЧеркассыы, шт": row["Наличие\nЧеркассыы, шт"],
               Цена: row["Цена"],
               "Цена спец": await calculateSpecialPrice(row["Цена"]),
-              //   Number(
-              //   parseFloat(row["Цена"].replace(",", "")) * 0.01 +
-              //     parseFloat(row["Цена"].replace(",", "")),
-              // ).toFixed(2),
-              // "Цена Розница": row["Цена Розница"],
             });
 
             // Save the document to MongoDB
@@ -124,13 +118,12 @@ const fetchEmail = async () => {
                   });
                 }
               }
-              console.log(product);
             });
-            savedDocsCount++;
-          } else {
-            console.log(`Save limit reached. Not saving more documents.`);
-            readableStream.destroy(); // Stop reading the stream if limit is reached
-          }
+            // savedDocsCount++;
+          // } else {
+          //   console.log(`Save limit reached. Not saving more documents.`);
+          //   readableStream.destroy(); // Stop reading the stream if limit is reached
+          // }
         })
         .on("end", async () => {
           //   // Remove the _output.csv file after reading
