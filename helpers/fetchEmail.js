@@ -58,7 +58,15 @@ const fetchEmail = async () => {
                     // Download attachments to a file
                     fs.writeFileSync(attachmentFilePath, attachment.content);
                     console.log(`Downloaded attachment: ${attachmentFilePath}`);
-                    const filePath = path.join(process.cwd());
+                    const filePath = path.join(process.cwd(), "unzipped");
+                    // Check if the directory already exists
+                    if (!fs.existsSync(filePath)) {
+                      // If not, create the directory
+                      fs.mkdirSync(filePath);
+                      console.log('Directory "unzipped" created successfully.');
+                    } else {
+                      console.log('Directory "unzipped" already exists.');
+                    }
                     fs.createReadStream(attachmentFilePath).pipe(
                       unzipper.Extract({ path: filePath }),
                     );
@@ -85,14 +93,43 @@ const fetchEmail = async () => {
 
                       // Convert the worksheet to CSV
                       const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                      // const filePathCSV = path.join(
+                      //   process.cwd(),
+                      //   "_output.csv",
+                      // );
+                      const outputFilePath = "_output.csv";
 
-                      fs.writeFileSync("_output.csv", csvData);
+                      function writeToFile(data, filePath, callback) {
+                        try {
+                          fs.writeFileSync(filePath, data);
+                          console.log(
+                            `File "${filePath}" written successfully.`,
+                          );
+                          callback(null); // Pass null as the first argument to indicate success
+                        } catch (error) {
+                          console.error(
+                            `Error writing to file "${filePath}":`,
+                            error.message,
+                          );
+                          callback(error); // Pass the error as the first argument to indicate failure
+                        }
+                      }
+
+                      // Example usage
+                      writeToFile(csvData, outputFilePath, (error) => {
+                        if (error) {
+                          console.error("File write failed:", error.message);
+                        } else {
+                          console.log("File write succeeded!");
+                          // Continue with other operations or code here
+                        }
+                      });
                       console.log(
                         `Conversion complete. CSV data saved to: _output.csv`,
                       );
+                      uploadToDB();
                     });
                   });
-                  uploadToDB();
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
                     if (err) throw err;
@@ -103,18 +140,18 @@ const fetchEmail = async () => {
                       if (err) throw err;
                       console.log("Expunged mailbox");
                       // Remove the zipped file after unzipping
-                       try {
-                         fs.unlinkSync(attachmentFilePath);
-                         console.log(
-                           `${attachmentFilePath} deleted successfully.`,
-                         );
-                         fs.unlinkSync(filePathXLSX);
-                         console.log(`${filePathXLSX} deleted successfully.`);
-                         fs.unlinkSync("_output.csv");
-                         console.log(`${"_output.csv"} deleted successfully.`);
-                       } catch (err) {
-                         console.error("Error deleting the file:", err.message);
-                       }
+                      // try {
+                      //   fs.unlinkSync(attachmentFilePath);
+                      //   console.log(
+                      //     `${attachmentFilePath} deleted successfully.`,
+                      //   );
+                      //   fs.unlinkSync(filePathXLSX);
+                      //   console.log(`${filePathXLSX} deleted successfully.`);
+                      //    fs.unlinkSync("_output.csv");
+                      //    console.log(`${"_output.csv"} deleted successfully.`);
+                      // } catch (err) {
+                      //   console.error("Error deleting the file:", err.message);
+                      // }
                       imap.end();
                     });
                   });
