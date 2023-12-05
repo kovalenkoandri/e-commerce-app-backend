@@ -83,14 +83,6 @@ const uploadToDB = async () => {
           // }
         })
         .on("end", async () => {
-          //   // Remove the _output.csv file after reading
-          //   // fs.unlink("_output.csv", (err) => {
-          //   //   if (err) {
-          //   //     console.error(`Error removing _output.csv file: ${err}`);
-          //   //   } else {
-          //   //     console.log("Removed _output.csv file");
-          //   //   }
-          //   // });
           await findDuplicates();
           console.log("CSV file successfully processed");
         });

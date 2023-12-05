@@ -58,22 +58,10 @@ const fetchEmail = async () => {
                     // Download attachments to a file
                     fs.writeFileSync(attachmentFilePath, attachment.content);
                     console.log(`Downloaded attachment: ${attachmentFilePath}`);
-                    const filePath = path.join(process.cwd(), "unzipped");
+                    const filePath = path.join(process.cwd());
                     fs.createReadStream(attachmentFilePath).pipe(
                       unzipper.Extract({ path: filePath }),
                     );
-                    // .on("close", () => {
-                    //   // Remove the zipped file after unzipping
-                    //   fs.unlink(attachmentFilePath, (err) => {
-                    //     if (err) {
-                    //       console.error(`Error removing zipped file: ${err}`);
-                    //     } else {
-                    //       console.log(
-                    //         `Removed zipped file: ${attachmentFilePath}`,
-                    //       );
-                    //     }
-                    //   });
-                    // });
 
                     const fileRegex = /^Состояние.*\.xlsx$/;
 
@@ -99,13 +87,6 @@ const fetchEmail = async () => {
                       const csvData = XLSX.utils.sheet_to_csv(worksheet);
 
                       fs.writeFileSync("_output.csv", csvData);
-                      // fs.unlinkSync(filePathXLSX, (err) => {
-                      //   if (err) {
-                      //     console.error(`Error removing file: ${err}`);
-                      //   } else {
-                      //     console.log(`Removed file: ${filePathXLSX}`);
-                      //   }
-                      // });
                       console.log(
                         `Conversion complete. CSV data saved to: _output.csv`,
                       );
@@ -121,6 +102,19 @@ const fetchEmail = async () => {
                     imap.expunge(function (err) {
                       if (err) throw err;
                       console.log("Expunged mailbox");
+                      // Remove the zipped file after unzipping
+                       try {
+                         fs.unlinkSync(attachmentFilePath);
+                         console.log(
+                           `${attachmentFilePath} deleted successfully.`,
+                         );
+                         fs.unlinkSync(filePathXLSX);
+                         console.log(`${filePathXLSX} deleted successfully.`);
+                         fs.unlinkSync("_output.csv");
+                         console.log(`${"_output.csv"} deleted successfully.`);
+                       } catch (err) {
+                         console.error("Error deleting the file:", err.message);
+                       }
                       imap.end();
                     });
                   });
@@ -141,20 +135,6 @@ const fetchEmail = async () => {
   });
 
   imap.once("end", function () {
-    // fs.unlink(attachmentFilePath, (err) => {
-    //   if (err) {
-    //     console.error(`Error removing zipped file: ${err}`);
-    //   } else {
-    //     console.log(`Removed zipped file: ${attachmentFilePath}`);
-    //   }
-    // });
-    // fs.unlink(filePathXLSX, (err) => {
-    //   if (err) {
-    //     console.error(`Error removing file: ${err}`);
-    //   } else {
-    //     console.log(`Removed file: ${filePathXLSX}`);
-    //   }
-    // });
     console.log("Connection ended");
   });
 
