@@ -4,6 +4,7 @@ const unzipper = require("unzipper");
 const path = require("path");
 const XLSX = require("xlsx");
 const uploadToDB = require("./uploadToDB");
+const simpleParser = require("mailparser").simpleParser;
 
 const {
   POP3_CLIENT_PORT,
@@ -12,9 +13,6 @@ const {
   POP3_CLIENT_USERNAME,
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
-let latestEmailUID = null;
-let attachmentFilePath = null;
-let filePathXLSX = null;
 
 const fetchEmail = async () => {
   const imap = new Imap({
@@ -38,6 +36,7 @@ const fetchEmail = async () => {
           if (err) throw err;
 
           // Find the UID of the newest email
+          let latestEmailUID = null;
           if (results.length > 0) {
             latestEmailUID = Math.max(...results);
           }
@@ -47,27 +46,28 @@ const fetchEmail = async () => {
 
             fetch.on("message", function (msg, seqno) {
               msg.on("body", function (stream, info) {
-                // Use a library like 'mailparser' to parse the email and extract attachments
-                const simpleParser = require("mailparser").simpleParser;
+                const filePath = path.join(process.cwd(), "unzipped");
 
+                // Use a library like 'mailparser' to parse the email and extract attachments
                 simpleParser(stream, (err, mail) => {
                   if (err) throw err;
                   mail.attachments.forEach((attachment) => {
-                    attachmentFilePath = path.join(
-                      process.cwd(),
-                      attachment.filename,
-                    );
-                    fs.writeFile(
-                      attachmentFilePath,
-                      attachment.content,
-                      (err) => {
-                        if (err) throw err;
-                        console.log(
-                          `The ${attachmentFilePath} has been saved!`,
-                        );
-                        const filePath = path.join(process.cwd(), "unzipped");
-                        fs.mkdir(filePath, { recursive: true }, (err) => {
+                    fs.mkdir(filePath, { recursive: true }, (err) => {
+                      if (err) throw err;
+                      const attachmentFilePath = path.join(
+                        process.cwd(),
+                        "unzipped",
+                        attachment.filename,
+                        // "zippedFile.zip" // hardcode does not write file below why
+                      );
+                      fs.writeFile(
+                        attachmentFilePath,
+                        attachment.content,
+                        (err) => {
                           if (err) throw err;
+                          console.log(
+                            `The ${attachmentFilePath} has been saved!`,
+                          );
                           fs.createReadStream(attachmentFilePath).pipe(
                             unzipper.Extract({ path: filePath }),
                           );
@@ -80,7 +80,7 @@ const fetchEmail = async () => {
                             );
                             // Process each matching file
                             matchingFiles.forEach((file) => {
-                              filePathXLSX = path.join(filePath, file);
+                              const filePathXLSX = path.join(filePath, file);
 
                               // Read the Excel file
                               const workbook = XLSX.readFile(filePathXLSX);
@@ -105,9 +105,9 @@ const fetchEmail = async () => {
                               });
                             });
                           });
-                        });
-                      },
-                    );
+                        },
+                      );
+                    });
                   });
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
@@ -118,19 +118,6 @@ const fetchEmail = async () => {
                     imap.expunge(function (err) {
                       if (err) throw err;
                       console.log("Expunged mailbox");
-                      // Remove the zipped file after unzipping
-                      // try {
-                      //   fs.unlinkSync(attachmentFilePath);
-                      //   console.log(
-                      //     `${attachmentFilePath} deleted successfully.`,
-                      //   );
-                      //   fs.unlinkSync(filePathXLSX);
-                      //   console.log(`${filePathXLSX} deleted successfully.`);
-                      //    fs.unlinkSync("_output.csv");
-                      //    console.log(`${"_output.csv"} deleted successfully.`);
-                      // } catch (err) {
-                      //   console.error("Error deleting the file:", err.message);
-                      // }
                       imap.end();
                     });
                   });
