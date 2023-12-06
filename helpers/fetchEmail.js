@@ -57,53 +57,43 @@ const fetchEmail = async () => {
                       const attachmentFilePath = path.join(
                         process.cwd(),
                         "unzipped",
-                        attachment.filename,
-                        // "zippedFile.zip" // hardcode does not write file below why
+                        "readyToParse.zip",
                       );
                       fs.writeFile(
                         attachmentFilePath,
                         attachment.content,
+                        {},
                         (err) => {
                           if (err) throw err;
                           console.log(
                             `The ${attachmentFilePath} has been saved!`,
                           );
-                          fs.createReadStream(attachmentFilePath).pipe(
-                            unzipper.Extract({ path: filePath }),
+                          const filePathXLSX = path.join(
+                            process.cwd(),
+                            "unzipped",
+                            "readyToParse.xlsx",
                           );
-                          const fileRegex = /^Состояние.*\.xlsx$/;
-                          fs.readdir(filePath, {}, (err, files) => {
+                          fs.createReadStream(attachmentFilePath)
+                            .pipe(unzipper.ParseOne())
+                            .pipe(fs.createWriteStream(filePathXLSX));
+
+                          // Read the Excel file
+                          const workbook = XLSX.readFile(filePathXLSX);
+
+                          // Assume the first sheet in the workbook
+                          const sheetName = workbook.SheetNames[0];
+                          const worksheet = workbook.Sheets[sheetName];
+
+                          // Convert the worksheet to CSV
+                          const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                          const filePathCSV = path.join(
+                            process.cwd(),
+                            "_output.csv",
+                          );
+                          fs.writeFile(filePathCSV, csvData, (err) => {
                             if (err) throw err;
-                            // Filter files based on the regular expression
-                            const matchingFiles = files.filter((file) =>
-                              fileRegex.test(file),
-                            );
-                            // Process each matching file
-                            matchingFiles.forEach((file) => {
-                              const filePathXLSX = path.join(filePath, file);
-
-                              // Read the Excel file
-                              const workbook = XLSX.readFile(filePathXLSX);
-
-                              // Assume the first sheet in the workbook
-                              const sheetName = workbook.SheetNames[0];
-                              const worksheet = workbook.Sheets[sheetName];
-
-                              // Convert the worksheet to CSV
-                              const csvData =
-                                XLSX.utils.sheet_to_csv(worksheet);
-                              const filePathCSV = path.join(
-                                process.cwd(),
-                                "_output.csv",
-                              );
-                              fs.writeFile(filePathCSV, csvData, (err) => {
-                                if (err) throw err;
-                                console.log(
-                                  `The ${filePathCSV} has been saved!`,
-                                );
-                                uploadToDB();
-                              });
-                            });
+                            console.log(`The ${filePathCSV} has been saved!`);
+                            uploadToDB();
                           });
                         },
                       );
