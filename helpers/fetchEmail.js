@@ -48,87 +48,66 @@ const fetchEmail = async () => {
             fetch.on("message", function (msg, seqno) {
               msg.on("body", function (stream, info) {
                 // Use a library like 'mailparser' to parse the email and extract attachments
-                // Here's a basic example using 'mailparser':
                 const simpleParser = require("mailparser").simpleParser;
 
                 simpleParser(stream, (err, mail) => {
                   if (err) throw err;
                   mail.attachments.forEach((attachment) => {
-                    attachmentFilePath = attachment.filename;
-                    // Download attachments to a file
-                    fs.writeFileSync(attachmentFilePath, attachment.content);
-                    console.log(`Downloaded attachment: ${attachmentFilePath}`);
-                    const filePath = path.join(process.cwd(), "unzipped");
-                    // Check if the directory already exists
-                    if (!fs.existsSync(filePath)) {
-                      // If not, create the directory
-                      fs.mkdirSync(filePath);
-                      console.log('Directory "unzipped" created successfully.');
-                    } else {
-                      console.log('Directory "unzipped" already exists.');
-                    }
-                    fs.createReadStream(attachmentFilePath).pipe(
-                      unzipper.Extract({ path: filePath }),
+                    attachmentFilePath = path.join(
+                      process.cwd(),
+                      attachment.filename,
                     );
+                    fs.writeFile(
+                      attachmentFilePath,
+                      attachment.content,
+                      (err) => {
+                        if (err) throw err;
+                        console.log(
+                          `The ${attachmentFilePath} has been saved!`,
+                        );
+                        const filePath = path.join(process.cwd(), "unzipped");
+                        fs.mkdir(filePath, { recursive: true }, (err) => {
+                          if (err) throw err;
+                          fs.createReadStream(attachmentFilePath).pipe(
+                            unzipper.Extract({ path: filePath }),
+                          );
+                          const fileRegex = /^Состояние.*\.xlsx$/;
+                          fs.readdir(filePath, {}, (err, files) => {
+                            if (err) throw err;
+                            // Filter files based on the regular expression
+                            const matchingFiles = files.filter((file) =>
+                              fileRegex.test(file),
+                            );
+                            // Process each matching file
+                            matchingFiles.forEach((file) => {
+                              filePathXLSX = path.join(filePath, file);
 
-                    const fileRegex = /^Состояние.*\.xlsx$/;
+                              // Read the Excel file
+                              const workbook = XLSX.readFile(filePathXLSX);
 
-                    // Read the files in the directory
-                    const files = fs.readdirSync(filePath);
+                              // Assume the first sheet in the workbook
+                              const sheetName = workbook.SheetNames[0];
+                              const worksheet = workbook.Sheets[sheetName];
 
-                    // Filter files based on the regular expression
-                    const matchingFiles = files.filter((file) =>
-                      fileRegex.test(file),
+                              // Convert the worksheet to CSV
+                              const csvData =
+                                XLSX.utils.sheet_to_csv(worksheet);
+                              const filePathCSV = path.join(
+                                process.cwd(),
+                                "_output.csv",
+                              );
+                              fs.writeFile(filePathCSV, csvData, (err) => {
+                                if (err) throw err;
+                                console.log(
+                                  `The ${filePathCSV} has been saved!`,
+                                );
+                                uploadToDB();
+                              });
+                            });
+                          });
+                        });
+                      },
                     );
-                    // Process each matching file
-                    matchingFiles.forEach((file) => {
-                      filePathXLSX = path.join(filePath, file);
-
-                      // Read the Excel file
-                      const workbook = XLSX.readFile(filePathXLSX);
-
-                      // Assume the first sheet in the workbook
-                      const sheetName = workbook.SheetNames[0];
-                      const worksheet = workbook.Sheets[sheetName];
-
-                      // Convert the worksheet to CSV
-                      const csvData = XLSX.utils.sheet_to_csv(worksheet);
-                      // const filePathCSV = path.join(
-                      //   process.cwd(),
-                      //   "_output.csv",
-                      // );
-                      const outputFilePath = "_output.csv";
-
-                      function writeToFile(data, filePath, callback) {
-                        try {
-                          fs.writeFileSync(filePath, data);
-                          console.log(
-                            `File "${filePath}" written successfully.`,
-                          );
-                          callback(null); // Pass null as the first argument to indicate success
-                        } catch (error) {
-                          console.error(
-                            `Error writing to file "${filePath}":`,
-                            error.message,
-                          );
-                          callback(error); // Pass the error as the first argument to indicate failure
-                        }
-                      }
-
-                      // Example usage
-                      writeToFile(csvData, outputFilePath, (error) => {
-                        if (error) {
-                          console.error("File write failed:", error.message);
-                        } else {
-                          console.log("File write succeeded!");
-                          // Continue with other operations or code here
-                        }
-                      });
-                      console.log(
-                        `Conversion complete. CSV data saved to: _output.csv`,
-                      );
-                      uploadToDB();
-                    });
                   });
                   // Move the email to the Trash
                   imap.move([latestEmailUID], "[Gmail]/Trash", function (err) {
