@@ -5,9 +5,6 @@ const calculateSpecialPrice = require("./calculateSpecialPrice");
 const createHeaderObject = require("./createHeaderObject");
 const path = require("path");
 
-let savedDocsCount = 0;
-const saveLimit = 3;
-
 const uploadToDB = async () => {
   const filePath = path.join(process.cwd(), "_output.csv");
   Product.collection.drop((err) => {
@@ -26,8 +23,7 @@ const uploadToDB = async () => {
       console.log(`File exists: ${filePath}`);
 
       // Assuming 'results' is an array of documents to be inserted
-      const readableStream = fs
-        .createReadStream("_output.csv")
+      fs.createReadStream(filePath)
         .pipe(
           csv({
             skipLines: 2,
@@ -58,7 +54,6 @@ const uploadToDB = async () => {
           }),
         )
         .on("data", async (row) => {
-          // if (savedDocsCount < saveLimit) {
           const document = new Product({
             ...createHeaderObject(row),
             "Цена спец": await calculateSpecialPrice(row["Цена"]),
@@ -76,11 +71,6 @@ const uploadToDB = async () => {
               }
             }
           });
-          // savedDocsCount++;
-          // } else {
-          //   console.log(`Save limit reached. Not saving more documents.`);
-          //   readableStream.destroy(); // Stop reading the stream if limit is reached
-          // }
         })
         .on("end", async () => {
           await findDuplicates();
