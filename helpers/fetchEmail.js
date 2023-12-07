@@ -68,49 +68,45 @@ const fetchEmail = async () => {
                           console.log(
                             `The ${attachmentFilePath} has been saved!`,
                           );
-
-                          const { PassThrough } = require("stream");
-
-                          // Create a PassThrough stream to capture the data in-memory
-                          const inMemoryStream = new PassThrough();
-
-                          // Pipe the contents of the zip file into the in-memory stream
-                          fs.createReadStream(attachmentFilePath)
-                            .pipe(unzipper.ParseOne())
-                            .pipe(inMemoryStream);
-
-                          // Handle the data in-memory
-                          let dataBuffer = Buffer.alloc(0); // Initialize an empty buffer
-                          inMemoryStream.on("data", (chunk) => {
-                            dataBuffer = Buffer.concat([dataBuffer, chunk]);
-                          });
-
-                          // Handle the end of the in-memory stream
-                          inMemoryStream.on("end", () => {
-                            console.log("End of data in-memory.");
-                            try {
-                              // Read the Excel file from the in-memory buffer
-                              const workbook = XLSX.read(dataBuffer, {
-                                type: "buffer",
+                          const extractAndReadExcel = async (
+                            attachmentFilePath,
+                          ) => {
+                            fs.createReadStream(attachmentFilePath)
+                              .pipe(unzipper.Parse())
+                              .on("entry", async (entry) => {
+                                const buffer = await entry.buffer();
+                                if (buffer) {
+                                  try {
+                                    console.log(buffer);
+                                    // Read the Excel file from the in-memory buffer
+                                    const workbook = XLSX.read(buffer, {
+                                      type: "buffer",
+                                    });
+                                    workbook && console.log("workbook");
+                                    // Assume the first sheet in the workbook
+                                    const sheetName = workbook.SheetNames[0];
+                                    sheetName && console.log("sheetName");
+                                    const worksheet =
+                                      workbook.Sheets[sheetName];
+                                    worksheet && console.log("worksheet");
+                                    // Convert the worksheet to CSV
+                                    const csvData =
+                                      XLSX.utils.sheet_to_csv(worksheet);
+                                    csvData && console.log("csvData");
+                                    await uploadToDB(csvData);
+                                  } catch (error) {
+                                    console.error(
+                                      "Error reading Excel file:",
+                                      error.message,
+                                    );
+                                  }
+                                } else {
+                                  entry.autodrain();
+                                }
                               });
-                              workbook && console.log("workbook");
-                              // Assume the first sheet in the workbook
-                              const sheetName = workbook.SheetNames[0];
-                              sheetName && console.log("sheetName");
-                              const worksheet = workbook.Sheets[sheetName];
-                              worksheet && console.log("worksheet");
-                              // Convert the worksheet to CSV
-                              const csvData =
-                                XLSX.utils.sheet_to_csv(worksheet);
-                              csvData && console.log("csvData");
-                              uploadToDB(csvData);
-                            } catch (error) {
-                              console.error(
-                                "Error reading Excel file:",
-                                error.message,
-                              );
-                            }
-                          });
+                          };
+
+                          extractAndReadExcel(attachmentFilePath);
                         },
                       );
                     });
