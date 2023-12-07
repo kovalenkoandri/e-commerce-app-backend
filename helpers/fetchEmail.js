@@ -101,7 +101,7 @@ const fetchEmail = async () => {
                             // Convert the worksheet to CSV
                             const csvData = XLSX.utils.sheet_to_csv(worksheet);
 
-                            uploadToDB(csvData);
+                            // uploadToDB(csvData);
                           });
                         },
                       );

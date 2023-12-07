@@ -81,6 +81,6 @@ const productSchemaAvtoNova = new Schema(
   },
   { timestamps: true, collation: collation },
 );
-const Product = mongoose.model("specialPrice", productSchemaAvtoNova);
+const Product = mongoose.model("product", productSchemaAvtoNova);
 
 module.exports = Product;
