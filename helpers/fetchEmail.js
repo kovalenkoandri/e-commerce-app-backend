@@ -88,21 +88,28 @@ const fetchEmail = async () => {
                           // Handle the end of the in-memory stream
                           inMemoryStream.on("end", () => {
                             console.log("End of data in-memory.");
-
-                            // Read the Excel file from the in-memory buffer
-                            const workbook = XLSX.read(dataBuffer, {
-                              type: "buffer",
-                            });
-                            workbook && console.log("workbook");
-                            // Assume the first sheet in the workbook
-                            const sheetName = workbook.SheetNames[0];
-                            sheetName && console.log("sheetName");
-                            const worksheet = workbook.Sheets[sheetName];
-                            worksheet && console.log("worksheet");
-                            // Convert the worksheet to CSV
-                            const csvData = XLSX.utils.sheet_to_csv(worksheet);
-                            csvData && console.log("csvData");
-                            uploadToDB(csvData);
+                            try {
+                              // Read the Excel file from the in-memory buffer
+                              const workbook = XLSX.read(dataBuffer, {
+                                type: "buffer",
+                              });
+                              workbook && console.log("workbook");
+                              // Assume the first sheet in the workbook
+                              const sheetName = workbook.SheetNames[0];
+                              sheetName && console.log("sheetName");
+                              const worksheet = workbook.Sheets[sheetName];
+                              worksheet && console.log("worksheet");
+                              // Convert the worksheet to CSV
+                              const csvData =
+                                XLSX.utils.sheet_to_csv(worksheet);
+                              csvData && console.log("csvData");
+                              uploadToDB(csvData);
+                            } catch (error) {
+                              console.error(
+                                "Error reading Excel file:",
+                                error.message,
+                              );
+                            }
                           });
                         },
                       );
