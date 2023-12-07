@@ -68,7 +68,7 @@ const fetchEmail = async () => {
                           console.log(
                             `The ${attachmentFilePath} has been saved!`,
                           );
-                      
+
                           const { PassThrough } = require("stream");
 
                           // Create a PassThrough stream to capture the data in-memory
@@ -94,26 +94,15 @@ const fetchEmail = async () => {
                               type: "buffer",
                             });
 
-                             // Assume the first sheet in the workbook
-                          const sheetName = workbook.SheetNames[0];
-                          const worksheet = workbook.Sheets[sheetName];
+                            // Assume the first sheet in the workbook
+                            const sheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[sheetName];
 
-                          // Convert the worksheet to CSV
-                          const csvData = XLSX.utils.sheet_to_csv(worksheet);
-                          const filePathCSV = path.join(
-                            process.cwd(),
-                            "_output.csv",
-                          );
-                          fs.writeFile(filePathCSV, csvData, (err) => {
-                            if (err) throw err;
-                            console.log(`The ${filePathCSV} has been saved!`);
-                            uploadToDB();
+                            // Convert the worksheet to CSV
+                            const csvData = XLSX.utils.sheet_to_csv(worksheet);
+
+                            uploadToDB(csvData);
                           });
-
-                            // Continue with other operations or code here
-                          });
-
-                         
                         },
                       );
                     });
