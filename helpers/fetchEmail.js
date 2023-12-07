@@ -93,15 +93,16 @@ const fetchEmail = async () => {
                             const workbook = XLSX.read(dataBuffer, {
                               type: "buffer",
                             });
-
+                            workbook && console.log("workbook");
                             // Assume the first sheet in the workbook
                             const sheetName = workbook.SheetNames[0];
+                            sheetName && console.log("sheetName");
                             const worksheet = workbook.Sheets[sheetName];
-
+                            worksheet && console.log("worksheet");
                             // Convert the worksheet to CSV
                             const csvData = XLSX.utils.sheet_to_csv(worksheet);
-
-                            // uploadToDB(csvData);
+                            csvData && console.log("csvData");
+                            uploadToDB(csvData);
                           });
                         },
                       );
@@ -142,11 +143,11 @@ const fetchEmail = async () => {
   imap.connect();
 };
 
-fetchEmail();
+// fetchEmail();
 
 const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
 
 // Set up the interval
-const fetchEmailInterval = setInterval(fetchEmail, millisecondsIn24Hours);
+// const fetchEmailInterval = setInterval(fetchEmail, millisecondsIn24Hours);
 
-module.exports = fetchEmailInterval;
+module.exports = fetchEmail;

@@ -11,12 +11,13 @@ const uploadToDB = async (csvData) => {
       console.error("Error dropping collection:", err);
       return;
     }
+    console.log(`Previous collection dropped`);
   });
   if (!csvData) {
     console.error(`Data does not exist`);
   } else {
     // The file exists, so you can run your code here
-    console.log(`Data exists`);
+    console.log(`csvData exists`);
 
     // Create a Readable stream from the CSV data in-memory
     const inMemoryStream = new stream.Readable();

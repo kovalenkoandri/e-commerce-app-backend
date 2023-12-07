@@ -2,7 +2,7 @@ const success200 = require('./success200');
 const notFound404 = require('./notFound404');
 const alreadyExists400 = require('./alreadyExists400');
 const sendEmail = require('./sendEmail');
-const fetchEmailInterval = require("./fetchEmail");
+const fetchEmail = require("./fetchEmail");
 const removeDuplicates = require("./removeDuplicates");
 
 module.exports = {
@@ -11,5 +11,5 @@ module.exports = {
   alreadyExists400,
   sendEmail,
   removeDuplicates,
-  fetchEmailInterval,
+  fetchEmail,
 };
