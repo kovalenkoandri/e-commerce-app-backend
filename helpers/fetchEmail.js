@@ -68,19 +68,33 @@ const fetchEmail = async () => {
                           console.log(
                             `The ${attachmentFilePath} has been saved!`,
                           );
-                          const filePathXLSX = path.join(
-                            process.cwd(),
-                            "unzipped",
-                            "readyToParse.xlsx",
-                          );
+                      
+                          const { PassThrough } = require("stream");
+
+                          // Create a PassThrough stream to capture the data in-memory
+                          const inMemoryStream = new PassThrough();
+
+                          // Pipe the contents of the zip file into the in-memory stream
                           fs.createReadStream(attachmentFilePath)
                             .pipe(unzipper.ParseOne())
-                            .pipe(fs.createWriteStream(filePathXLSX));
+                            .pipe(inMemoryStream);
 
-                          // Read the Excel file
-                          const workbook = XLSX.readFile(filePathXLSX);
+                          // Handle the data in-memory
+                          let dataBuffer = Buffer.alloc(0); // Initialize an empty buffer
+                          inMemoryStream.on("data", (chunk) => {
+                            dataBuffer = Buffer.concat([dataBuffer, chunk]);
+                          });
 
-                          // Assume the first sheet in the workbook
+                          // Handle the end of the in-memory stream
+                          inMemoryStream.on("end", () => {
+                            console.log("End of data in-memory.");
+
+                            // Read the Excel file from the in-memory buffer
+                            const workbook = XLSX.read(dataBuffer, {
+                              type: "buffer",
+                            });
+
+                             // Assume the first sheet in the workbook
                           const sheetName = workbook.SheetNames[0];
                           const worksheet = workbook.Sheets[sheetName];
 
@@ -95,6 +109,11 @@ const fetchEmail = async () => {
                             console.log(`The ${filePathCSV} has been saved!`);
                             uploadToDB();
                           });
+
+                            // Continue with other operations or code here
+                          });
+
+                         
                         },
                       );
                     });
