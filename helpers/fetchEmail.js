@@ -77,23 +77,22 @@ const fetchEmail = async () => {
                                 const buffer = await entry.buffer();
                                 if (buffer) {
                                   try {
-                                    console.log(buffer);
-                                    // Read the Excel file from the in-memory buffer
-                                    const workbook = XLSX.read(buffer, {
-                                      type: "buffer",
+                                    let sheetRows = 4;
+                                    const rows = Array(100).fill("rowData");
+                                    rows.forEach(async () => {
+                                      const workbook = XLSX.read(buffer, {
+                                        type: "buffer",
+                                        sheetRows, // If >0, read the first sheetRows rows
+                                      });
+                                      sheetRows += 1;
+                                      const sheetName = workbook.SheetNames[0];
+                                      const worksheet =
+                                        workbook.Sheets[sheetName];
+                                      const csvData =
+                                        XLSX.utils.sheet_to_csv(worksheet);
+                                      csvData && console.log(csvData);
+                                      await uploadToDB(csvData);
                                     });
-                                    workbook && console.log("workbook");
-                                    // Assume the first sheet in the workbook
-                                    const sheetName = workbook.SheetNames[0];
-                                    sheetName && console.log("sheetName");
-                                    const worksheet =
-                                      workbook.Sheets[sheetName];
-                                    worksheet && console.log("worksheet");
-                                    // Convert the worksheet to CSV
-                                    const csvData =
-                                      XLSX.utils.sheet_to_csv(worksheet);
-                                    csvData && console.log("csvData");
-                                    await uploadToDB(csvData);
                                   } catch (error) {
                                     console.error(
                                       "Error reading Excel file:",
