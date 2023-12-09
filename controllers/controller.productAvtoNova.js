@@ -2,6 +2,7 @@ const Product = require("../models/productAvtoNova");
 const { success200, notFound404 } = require("../helpers");
 
 const product_get = (req, res) => {
+  res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
   let page = parseInt(req.query.page) || 0; //for next page pass 1 here
   let limit = parseInt(req.query.limit) || 0;
   Product.find()
