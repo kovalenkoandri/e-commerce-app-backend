@@ -3,33 +3,11 @@ const { success200, notFound404 } = require("../helpers");
 
 const product_get = (req, res) => {
   res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
-  let page = parseInt(req.query.page) || 0; //for next page pass 1 here
-  let limit = parseInt(req.query.limit) || 0;
-  Product.find()
-    .sort({ update_at: -1 })
-    .skip(page * limit) //Notice here
-    .limit(limit)
-    // eslint-disable-next-line consistent-return
-    .exec((err, data) => {
-      if (err) {
-        return res.status(400).send({
-          status: "ERR_SERVER",
-          message: err.message,
-          content: null,
-        });
-      }
-      Product.countDocuments().exec((count_error, count) => {
-        if (err) {
-          return res.json(count_error);
-        }
-        return res.json({
-          total: count,
-          page: page,
-          pageSize: data.length,
-          content: data,
-        });
-      });
-    });
+  return res.status(200).send({
+    status: "OK",
+    message: "Uploading...",
+    content: null,
+  });
 };
 const product_getByFabricOrOriginalId = async (req, res) => {
   const { fabrictId } = req.params;
