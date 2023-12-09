@@ -2,9 +2,9 @@
   "name": "stone-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon --max-old-space-size=128 app.js"
+    "start": "nodemon api/index.js"
   },
   "author": "",
   "license": "ISC",
