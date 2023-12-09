@@ -40,16 +40,16 @@ mongoose.connect(
   },
   () => {
     app.listen(process.env.PORT, ip);
-    let dirPath = path.join(
-      __dirname,
-      'public/api/static/images/productPictures',
-    );
-    let dirPathUser = path.join(
-      __dirname,
-      'public/api/static/images/userprofile',
-    );
-    createDir(dirPath);
-    createDir(dirPathUser);
+    // let dirPath = path.join(
+    //   __dirname,
+    //   'public/api/static/images/productPictures',
+    // );
+    // let dirPathUser = path.join(
+    //   __dirname,
+    //   'public/api/static/images/userprofile',
+    // );
+    // createDir(dirPath);
+    // createDir(dirPathUser);
     console.log('Connected to DB');
   },
 );
