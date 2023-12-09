@@ -86,8 +86,8 @@ app.get("/expo", (req, res) => {
 });
 // app.use(`/api/${process.env.VERSION}/product`, productRoute);
 app.use(`/api/${process.env.VERSION}/product`, productAvtoNovaRoute);
-app.use(`/api/${process.env.VERSION}/cart`, cartRoute);
-app.use(`/api/${process.env.VERSION}/order`, orderRoute);
-app.use(`/api/${process.env.VERSION}/favoritelist`, favoriteRoute);
-app.use(`/api/${process.env.VERSION}/user`, authRoute);
-app.use(`/api/notification`, notification);
+// app.use(`/api/${process.env.VERSION}/cart`, cartRoute);
+// app.use(`/api/${process.env.VERSION}/order`, orderRoute);
+// app.use(`/api/${process.env.VERSION}/favoritelist`, favoriteRoute);
+// app.use(`/api/${process.env.VERSION}/user`, authRoute);
+// app.use(`/api/notification`, notification);
