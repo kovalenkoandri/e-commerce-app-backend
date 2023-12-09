@@ -11,24 +11,7 @@ const uploadToDB = async (csvData) => {
   } else {
     // The file exists, so you can run your code here
     console.log(`csvData exists`);
-    // const mongoose = require("mongoose");
-
-    // Set Up the Database connection
-
-    // const connectionObject = mongoose.createConnection(
-    //   process.env.DB_CONNECTION,
-    //   {
-    //     useNewUrlParser: true,
-    //     useUnifiedTopology: false,
-    //   }
-    // );
-  //  await connectionObject
-  //     .dropCollection("products")
-  //     .then((success) => {
-  //       console.log(success);
-  //       console.log(`Previous collection dropped`);
-  //     })
-  //     .catch((err) => console.log(err));
+    
     // Create a Readable stream from the CSV data in-memory
     const inMemoryStream = new stream.Readable();
     inMemoryStream._read = () => {}; // Required for the stream to work

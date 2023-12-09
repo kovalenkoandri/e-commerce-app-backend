@@ -4,6 +4,7 @@ const unzipper = require("unzipper");
 const path = require("path");
 const XLSX = require("xlsx");
 const uploadToDB = require("./uploadToDB");
+const dropOldProduducts = require("./dropOldProducts");
 const simpleParser = require("mailparser").simpleParser;
 
 const {
@@ -75,24 +76,21 @@ const fetchEmail = async () => {
                               .pipe(unzipper.Parse())
                               .on("entry", async (entry) => {
                                 const buffer = await entry.buffer();
+                                await dropOldProduducts();
+
                                 if (buffer) {
                                   try {
-                                    let sheetRows = 4;
-                                    const rows = Array(100).fill("rowData");
-                                    rows.forEach(async () => {
-                                      const workbook = XLSX.read(buffer, {
-                                        type: "buffer",
-                                        sheetRows, // If >0, read the first sheetRows rows
-                                      });
-                                      sheetRows += 1;
-                                      const sheetName = workbook.SheetNames[0];
-                                      const worksheet =
-                                        workbook.Sheets[sheetName];
-                                      const csvData =
-                                        XLSX.utils.sheet_to_csv(worksheet);
-                                      csvData && console.log(csvData);
-                                      await uploadToDB(csvData);
+                                    let sheetRows = 30000;
+                                    const workbook = XLSX.read(buffer, {
+                                      type: "buffer",
+                                      sheetRows, // If >0, read the first sheetRows rows
                                     });
+                                    const sheetName = workbook.SheetNames[0];
+                                    const worksheet =
+                                      workbook.Sheets[sheetName];
+                                    const csvData =
+                                      XLSX.utils.sheet_to_csv(worksheet);
+                                    await uploadToDB(csvData);
                                   } catch (error) {
                                     console.error(
                                       "Error reading Excel file:",
