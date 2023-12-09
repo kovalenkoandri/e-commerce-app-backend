@@ -19,12 +19,12 @@ require("dotenv/config");
 
 //import routes
 // const productRoute = require("./routes/product");
-const productAvtoNovaRoute = require("../routes/productAvtoNova");
-const cartRoute = require("../routes/cart");
-const orderRoute = require("../routes/order");
-const favoriteRoute = require("../routes/favorite");
-const authRoute = require("../routes/auth");
-const notification = require("../middlewares/pushNotification");
+const productAvtoNovaRoute = require("./routes/productAvtoNova");
+// const cartRoute = require("./routes/cart");
+// const orderRoute = require("./routes/order");
+// const favoriteRoute = require("./routes/favorite");
+// const authRoute = require("./routes/auth");
+// const notification = require("./middlewares/pushNotification");
 
 //Connect to DB
 const dbURI = process.env.DB_CONNECTION;
