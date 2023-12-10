@@ -5,10 +5,10 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
-const os = require("os");
-fs = require('fs');
+// const os = require("os");
+fs = require("fs");
 
-const networkInterfaces = os.networkInterfaces();
+// const networkInterfaces = os.networkInterfaces();
 const ip = process.env.HOST_NAME;
 // const ip = networkInterfaces['Ethernet 2'][1].address;
 // const ip = '192.168.43.123';
@@ -28,7 +28,7 @@ const productAvtoNovaRoute = require("./routes/productAvtoNova");
 
 //Connect to DB
 const dbURI = process.env.DB_CONNECTION;
-mongoose.set('strictQuery', false);
+mongoose.set("strictQuery", false);
 mongoose.connect(
   dbURI,
   // https://mongoosejs.com/docs/5.x/docs/connections.html#error-handling
@@ -50,21 +50,26 @@ mongoose.connect(
     // );
     // createDir(dirPath);
     // createDir(dirPathUser);
-    console.log('Connected to DB');
+    console.log("Connected to DB");
   },
 );
+app.on("listening", function () {
+  // server ready to accept connections here
+  const { fetchEmail } = require("./helpers");
+  fetchEmail();
+});
 
-function createDir(dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true }, (err) => {
-      if (err) {
-        console.error("createDir Error:", err);
-      } else {
-        console.log("Directory is made!");
-      }
-    });
-  }
-}
+// function createDir(dirPath) {
+//   if (!fs.existsSync(dirPath)) {
+//     fs.mkdirSync(dirPath, { recursive: true }, (err) => {
+//       if (err) {
+//         console.error("createDir Error:", err);
+//       } else {
+//         console.log("Directory is made!");
+//       }
+//     });
+//   }
+// }
 
 //middleware & static files
 app.use(morgan("dev"));
@@ -75,15 +80,15 @@ app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" }));
 
 //routes
-app.get("/expo", (req, res) => {
-  const id = req.query.userid;
-  const token = req.query.token;
-  console.log(id, token);
-  res.writeHead(301, {
-    Location: `exp://${ip}:19000/--/ResetPw?userid=${id}&token=${token}`,
-  });
-  res.end();
-});
+// app.get("/expo", (req, res) => {
+//   const id = req.query.userid;
+//   const token = req.query.token;
+//   console.log(id, token);
+//   res.writeHead(301, {
+//     Location: `exp://${ip}:19000/--/ResetPw?userid=${id}&token=${token}`,
+//   });
+//   res.end();
+// });
 // app.use(`/api/${process.env.VERSION}/product`, productRoute);
 app.use(`/api/${process.env.VERSION}/product`, productAvtoNovaRoute);
 // app.use(`/api/${process.env.VERSION}/cart`, cartRoute);

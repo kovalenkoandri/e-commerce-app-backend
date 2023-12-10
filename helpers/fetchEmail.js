@@ -15,7 +15,7 @@ const {
 } = process.env;
 const searchTerm = "Состояние"; // The word to search for in the subject
 
-const fetchEmail = async () => {
+const fetchEmailInterval = async () => {
   const imap = new Imap({
     user: POP3_CLIENT_USERNAME,
     password: POP3_CLIENT_PASSWORD,
@@ -142,11 +142,9 @@ const fetchEmail = async () => {
   imap.connect();
 };
 
-// fetchEmail();
-
-const millisecondsIn24Hours = 24 * 60 * 60 * 1000;
+const millisecondsInHour = 20 * 60 * 1000; // every 20 min check for email with searchTerm header
 
 // Set up the interval
-// const fetchEmailInterval = setInterval(fetchEmail, millisecondsIn24Hours);
+const fetchEmail = setInterval(fetchEmailInterval, millisecondsInHour);
 
 module.exports = fetchEmail;

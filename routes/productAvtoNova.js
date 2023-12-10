@@ -2,9 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { upload, resize } = require("../middlewares/upload");
 const productController = require("../controllers/controller.productAvtoNova");
-const { fetchEmail } = require("../helpers");
 
-router.get("/", fetchEmail, productController.product_get);
+router.get("/", productController.product_get);
 router.get("/:fabrictId", productController.product_getByFabricOrOriginalId);
 
 //post

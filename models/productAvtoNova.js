@@ -27,48 +27,6 @@ const productSchemaAvtoNova = new Schema(
     "Наличие шт": {
       type: String,
     },
-    "Наличие\nЛьвов, шт": {
-      type: String,
-    },
-    "Наличие\nЧерновцы, шт": {
-      type: String,
-    },
-    "Наличие\nИвано-Франковск, шт": {
-      type: String,
-    },
-    "Наличие\nУжгород, шт": {
-      type: String,
-    },
-    "Наличие\nОдесса, шт": {
-      type: String,
-    },
-    "Наличие\nКременчуг, шт": {
-      type: String,
-    },
-    "Наличие\nПолтава, шт": {
-      type: String,
-    },
-    "Наличие\nДнепропетровск, шт": {
-      type: String,
-    },
-    "Наличие\nХарьков, шт": {
-      type: String,
-    },
-    "Наличие\nТернополь, шт": {
-      type: String,
-    },
-    "Наличие\nЗапорожье, шт": {
-      type: String,
-    },
-    "Наличие\nБелая Церковь, шт": {
-      type: String,
-    },
-    "Наличие\nКропивницький, шт": {
-      type: String,
-    },
-    "Наличие\nЧеркассыы, шт": {
-      type: String,
-    },
     Цена: {
       type: String,
     },
