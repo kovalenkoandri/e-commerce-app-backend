@@ -80,10 +80,9 @@ const fetchEmail = async () => {
 
                                 if (buffer) {
                                   try {
-                                    let sheetRows = 30000;
                                     const workbook = XLSX.read(buffer, {
                                       type: "buffer",
-                                      sheetRows, // If >0, read the first sheetRows rows
+                                      sheetRows: 17500, // If >0, read the first sheetRows rows
                                     });
                                     const sheetName = workbook.SheetNames[0];
                                     const worksheet =
