@@ -32,12 +32,8 @@ mongoose.set("strictQuery", false);
 mongoose.connect(
   dbURI,
   // https://mongoosejs.com/docs/5.x/docs/connections.html#error-handling
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: false,
-    // useFindAndModify: false,
-    // useCreateIndex: true,
-  },
+  // https://mongoosejs.com/docs/6.x/docs/migrating_to_6.html#no-more-deprecation-warning-options
+  {},
   () => {
     app.listen(process.env.PORT, ip);
     // let dirPath = path.join(
