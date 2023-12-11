@@ -49,11 +49,6 @@ mongoose.connect(
     console.log("Connected to DB");
   },
 );
-app.on("listen()", function () {
-  // server ready to accept connections here
-  const { fetchEmail } = require("./helpers");
-  fetchEmail();
-});
 
 // function createDir(dirPath) {
 //   if (!fs.existsSync(dirPath)) {
