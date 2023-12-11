@@ -49,7 +49,7 @@ mongoose.connect(
     console.log("Connected to DB");
   },
 );
-app.on("listening", function () {
+app.on("listen()", function () {
   // server ready to accept connections here
   const { fetchEmail } = require("./helpers");
   fetchEmail();
