@@ -1,16 +1,16 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
-const { SENDINBLUE, SENDER_EMAIL, RECEIVER_EMAIL } = process.env;
+const { BREVO, SENDER_EMAIL, RECEIVER_EMAIL, SMTP } = process.env;
 
 const nodemailerConfig = {
-  host: "smtp-relay.sendinblue.com",
+  host: SMTP,
   port: 587,
   secure: false,
   ignoreTLS: true,
   auth: {
     user: SENDER_EMAIL,
-    pass: SENDINBLUE,
+    pass: BREVO,
   },
 };
 
@@ -28,7 +28,7 @@ const sendEmail = (cartData) => {
         <div>
           Товар:
           <ul>
-            ${Object.entries(cartData.product._doc)
+            ${Object.entries(cartData.product)
               .map(([key, value]) => `<li>${key}: ${value}</li>`)
               .join("")}
           </ul>
