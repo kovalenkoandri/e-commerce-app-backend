@@ -1,10 +1,10 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
-const { BREVO, SENDER_EMAIL, RECEIVER_EMAIL, SMTP } = process.env;
+const { BREVO, SENDER_EMAIL, RECEIVER_EMAIL } = process.env;
 
 const nodemailerConfig = {
-  host: SMTP,
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
   ignoreTLS: true,
