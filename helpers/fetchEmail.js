@@ -23,6 +23,10 @@ const fetchEmail = async () => {
     port: POP3_CLIENT_PORT,
     tls: true,
   });
+  const millisecondsInHour = 20 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
+
+  // Set up the interval
+  setInterval(fetchEmail, millisecondsInHour);
   function openInbox(cb) {
     imap.openBox("INBOX", false, cb); // Set readOnly to false to allow modifications
   }
@@ -142,8 +146,6 @@ const fetchEmail = async () => {
   imap.connect();
 };
 
-const millisecondsInHour = 20 * 60 * 1000; // every 20 min check for email with searchTerm header
+fetchEmail();
 
-// Set up the interval
-setInterval(fetchEmail, millisecondsInHour);
 module.exports = fetchEmail;
