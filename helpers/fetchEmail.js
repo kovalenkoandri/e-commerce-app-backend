@@ -23,7 +23,7 @@ const fetchEmail = async () => {
     port: POP3_CLIENT_PORT,
     tls: true,
   });
-  const millisecondsInHour = 20 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
+  const millisecondsInHour = 2 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
 
   // Set up the interval
   setInterval(fetchEmail, millisecondsInHour);
