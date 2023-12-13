@@ -6,7 +6,7 @@ const XLSX = require("xlsx");
 const uploadToDB = require("./uploadToDB");
 const dropOldProduducts = require("./dropOldProducts");
 const simpleParser = require("mailparser").simpleParser;
-
+const UpdateTime = require("../models/updateTimeAvtoNova");
 const {
   POP3_CLIENT_PORT,
   POP3_CLIENT_HOST,
@@ -23,7 +23,7 @@ const fetchEmail = async () => {
     port: POP3_CLIENT_PORT,
     tls: true,
   });
-  const millisecondsInHour = 2 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
+  const millisecondsInHour = 20 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
 
   // Set up the interval
   setInterval(fetchEmail, millisecondsInHour);
@@ -50,6 +50,17 @@ const fetchEmail = async () => {
             const fetch = imap.fetch(latestEmailUID, { bodies: "" });
 
             fetch.on("message", function (msg, seqno) {
+              msg.on("attributes", async function (attrs) {
+                  const document = new UpdateTime({
+                    updateDate: attrs.date,
+                  });
+                  document.save((err, _) => {
+                    if (err) {
+                      //error for dupes
+                      if (err) throw err;
+                    }
+                  });
+              });
               msg.on("body", function (stream, info) {
                 const filePath = path.join(process.cwd(), "unzipped");
 
