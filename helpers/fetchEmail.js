@@ -50,17 +50,17 @@ const fetchEmail = async () => {
             const fetch = imap.fetch(latestEmailUID, { bodies: "" });
 
             fetch.on("message", function (msg, seqno) {
-              // msg.on("attributes", async function (attrs) {
-              //     const document = new UpdateTime({
-              //       updateDate: attrs.date,
-              //     });
-              //     document.save((err, _) => {
-              //       if (err) {
-              //         //error for dupes
-              //         if (err) throw err;
-              //       }
-              //     });
-              // });
+              msg.on("attributes", async function (attrs) {
+                  const document = new UpdateTime({
+                    updateDate: attrs.date,
+                  });
+                  document.save((err, _) => {
+                    if (err) {
+                      //error for dupes
+                      if (err) throw err;
+                    }
+                  });
+              });
               msg.on("body", function (stream, info) {
                 const filePath = path.join(process.cwd(), "unzipped");
 
@@ -97,7 +97,7 @@ const fetchEmail = async () => {
                                   try {
                                     const workbook = XLSX.read(buffer, {
                                       type: "buffer",
-                                      sheetRows: 17500, // If >0, read the first sheetRows rows
+                                      sheetRows: 15000, // If >0, read the first sheetRows rows
                                     });
                                     const sheetName = workbook.SheetNames[0];
                                     const worksheet =
