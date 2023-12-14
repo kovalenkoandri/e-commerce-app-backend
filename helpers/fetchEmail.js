@@ -50,17 +50,17 @@ const fetchEmail = async () => {
             const fetch = imap.fetch(latestEmailUID, { bodies: "" });
 
             fetch.on("message", function (msg, seqno) {
-              msg.on("attributes", async function (attrs) {
-                  const document = new UpdateTime({
-                    updateDate: attrs.date,
-                  });
-                  document.save((err, _) => {
-                    if (err) {
-                      //error for dupes
-                      if (err) throw err;
-                    }
-                  });
-              });
+              // msg.on("attributes", async function (attrs) {
+              //     const document = new UpdateTime({
+              //       updateDate: attrs.date,
+              //     });
+              //     document.save((err, _) => {
+              //       if (err) {
+              //         //error for dupes
+              //         if (err) throw err;
+              //       }
+              //     });
+              // });
               msg.on("body", function (stream, info) {
                 const filePath = path.join(process.cwd(), "unzipped");
 
