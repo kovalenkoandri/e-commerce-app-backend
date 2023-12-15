@@ -20,7 +20,7 @@ require("dotenv/config");
 //import routes
 // const productRoute = require("./routes/product");
 const productAvtoNovaRoute = require("./routes/productAvtoNova");
-// const cartRoute = require("./routes/cart");
+const cartRoute = require("./routes/cart");
 const orderRoute = require("./routes/order");
 // const favoriteRoute = require("./routes/favorite");
 // const authRoute = require("./routes/auth");
@@ -82,7 +82,7 @@ app.use(bodyParser.urlencoded({ extended: false, limit: "10mb" }));
 // });
 // app.use(`/api/${process.env.VERSION}/product`, productRoute);
 app.use(`/api/${process.env.VERSION}/product`, productAvtoNovaRoute);
-// app.use(`/api/${process.env.VERSION}/cart`, cartRoute);
+app.use(`/api/${process.env.VERSION}/cart`, cartRoute);
 app.use(`/api/${process.env.VERSION}/order`, orderRoute);
 // app.use(`/api/${process.env.VERSION}/favoritelist`, favoriteRoute);
 // app.use(`/api/${process.env.VERSION}/user`, authRoute);

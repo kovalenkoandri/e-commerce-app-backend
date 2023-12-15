@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const cartController = require('../controllers/controller.cart');
+const cartController = require('../controllers/controller.cartAvtoNova');
 const verifyToken = require('../middlewares/verifytoken');
 
-router.get('/', verifyToken, cartController.cart_get);
+router.get('/', cartController.cart_get);
+// router.get('/', verifyToken, cartController.cart_get);
 
 router.post('/post', verifyToken, cartController.cart_post);
 
