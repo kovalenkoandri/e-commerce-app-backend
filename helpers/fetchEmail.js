@@ -97,7 +97,7 @@ const fetchEmail = async () => {
                                   try {
                                     const workbook = XLSX.read(buffer, {
                                       type: "buffer",
-                                      sheetRows: 15000, // If >0, read the first sheetRows rows
+                                      // sheetRows: 15000, // If >0, read the first sheetRows rows
                                     });
                                     const sheetName = workbook.SheetNames[0];
                                     const worksheet =
@@ -157,6 +157,6 @@ const fetchEmail = async () => {
   imap.connect();
 };
 
-fetchEmail();
+// fetchEmail();
 
 module.exports = fetchEmail;
