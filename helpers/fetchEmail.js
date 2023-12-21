@@ -13,7 +13,7 @@ const {
   POP3_CLIENT_PASSWORD,
   POP3_CLIENT_USERNAME,
 } = process.env;
-const searchTerm = "Состояние"; // The word to search for in the subject
+const searchTerm = "склад"; // The word to search for in the subject
 
 const fetchEmail = async () => {
   const imap = new Imap({
@@ -23,7 +23,7 @@ const fetchEmail = async () => {
     port: POP3_CLIENT_PORT,
     tls: true,
   });
-  const millisecondsInHour = 20 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
+  const millisecondsInHour = 200 * 60 * 1000; // 20 * 60 means every 20 min check for email with searchTerm header
 
   // Set up the interval
   setInterval(fetchEmail, millisecondsInHour);
@@ -51,15 +51,15 @@ const fetchEmail = async () => {
 
             fetch.on("message", function (msg, seqno) {
               msg.on("attributes", async function (attrs) {
-                  const document = new UpdateTime({
-                    updateDate: attrs.date,
-                  });
-                  document.save((err, _) => {
-                    if (err) {
-                      //error for dupes
-                      if (err) throw err;
-                    }
-                  });
+                const document = new UpdateTime({
+                  updateDate: attrs.date,
+                });
+                document.save((err, _) => {
+                  if (err) {
+                    //error for dupes
+                    if (err) throw err;
+                  }
+                });
               });
               msg.on("body", function (stream, info) {
                 const filePath = path.join(process.cwd(), "unzipped");
