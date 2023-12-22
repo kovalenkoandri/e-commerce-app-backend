@@ -4,6 +4,7 @@ const alreadyExists400 = require("./alreadyExists400");
 const sendEmail = require("./sendEmail");
 const fetchEmail = require("./fetchEmail");
 const removeDuplicates = require("./removeDuplicates");
+const searchQuery = require("./searchQuery");
 
 module.exports = {
   success200,
@@ -12,4 +13,5 @@ module.exports = {
   sendEmail,
   removeDuplicates,
   fetchEmail,
+  searchQuery,
 };
