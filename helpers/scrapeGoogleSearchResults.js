@@ -17,7 +17,7 @@ async function scrapeGoogleSearchResults(query) {
   };
 
   // Scroll a few times to load more results (adjust the loop count based on your needs)
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 1; i++) {
     await scrollPage();
   }
 
@@ -32,14 +32,26 @@ async function scrapeGoogleSearchResults(query) {
         // ".qLRx3b.tjvcx.GvPZzd.cHaqb", // full path
       )?.textContent;
       const priceElement = element.querySelector(".fG8Fp.uo4vr");
-      const price = priceElement
+      const priceText = priceElement
         ? priceElement?.textContent
         : "Price not available";
+
+      // Use a regular expression to extract the price (assuming it's in the format '162,00 грн')
+      const match = priceText.match(/(\d{1,6}(?:,\d{1,3}))\sгрн/);
+
+      // If a match is found, use the captured group as the price, otherwise set it to 'Price not available'
+      const price = match ? match[1] : "Price not available";
       return { siteAddress, price };
     });
   });
 
   console.log("Prices:", prices);
+  // Filter out objects with 'Price not available'
+  const filteredResults = prices.filter(
+    (result) => result.price !== "Price not available",
+  );
+
+  console.log("Results:", filteredResults);
 
   await browser.close();
 }
