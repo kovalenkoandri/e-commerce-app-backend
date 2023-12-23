@@ -35,5 +35,5 @@ const searchQuery = async () => {
   console.log(fullTitle);
   await browser.close();
 };
-searchQuery();
+// searchQuery();
 module.exports = searchQuery;
