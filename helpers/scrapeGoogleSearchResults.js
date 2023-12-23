@@ -1,17 +1,28 @@
 const puppeteer = require("puppeteer");
 
 async function scrapeGoogleSearchResults(query) {
-  const browser = await puppeteer.launch({ headless: 'new' });
+  const browser = await puppeteer.launch({ headless: "new" });
   const page = await browser.newPage();
 
   // Navigate to Google search results page
   await page.goto(`https://www.google.com/search?q=${query}`);
 
-  
+  await page.waitForSelector(".fG8Fp.uo4vr"); // ensure at least first result awaited
   // Extract prices from the search results
   const prices = await page.evaluate(() => {
-    const priceElements = document.querySelectorAll(".fG8Fp.uo4vr");
-    return Array.from(priceElements, (element) => element.textContent);
+    const resultElements = document.querySelectorAll(".MjjYud");
+    return Array.from(resultElements, (element) => {
+      const siteAddress = element.querySelector(
+        // 'a[jsname="UWckNb"]',
+        ".VuuXrf", // main name
+        // ".qLRx3b.tjvcx.GvPZzd.cHaqb", // full path
+      ).textContent;
+      const priceElement = element.querySelector(".fG8Fp.uo4vr");
+      const price = priceElement
+        ? priceElement.textContent
+        : "Price not available";
+      return { siteAddress, price };
+    });
   });
 
   console.log("Prices:", prices);
@@ -22,11 +33,3 @@ async function scrapeGoogleSearchResults(query) {
 // Example usage
 scrapeGoogleSearchResults("712550710");
 module.exports = scrapeGoogleSearchResults;
-
-// find first applicable
-  // const priceSelector = await page.waitForSelector(
-  //   ".fG8Fp.uo4vr",
-  //   // "#rso > div:nth-child(2) > div > div > div:nth-child(4) > div > span",
-  // );
-
-  // const prices = await priceSelector?.evaluate((el) => el.textContent);
