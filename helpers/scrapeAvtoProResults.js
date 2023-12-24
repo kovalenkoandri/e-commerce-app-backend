@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
 
 // async function scrapeAvtoProResults(query) {
-//   const browser = await puppeteer.launch({ headless: "new" });
+// const browser = await puppeteer.launch({ headless: "new" });
 //   const page = await browser.newPage();
 //   await page.goto(`https://avto.pro`);
 //   await page.type(".pro-input.pro-input--framed.ap-search__input", query);
@@ -33,8 +33,8 @@ const puppeteer = require("puppeteer");
 // }
 
 async function scrapeAvtoProResults(query) {
-  // const browser = await puppeteer.launch({ headless: "new" });
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: "new" });
+  // const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(`https://avto.pro`);
   const inputSelector = ".pro-input.pro-input--framed.ap-search__input";
@@ -48,28 +48,25 @@ async function scrapeAvtoProResults(query) {
   // Use page.evaluate to run code in the context of the browser page
   // const prices = await page.evaluate(() => {
   //   console.log('asdas');
-  const pricesArray = [];
-  
-  await page.click(trSelector); // Click on each result element
-  
-  const priceValueSelector = ".pro-card__price__value";
-  await page.waitForSelector(priceValueSelector);
+
   const evaluated = await page.evaluate(() => {
+    const pricesArray = [];
     const resultElements = document.querySelectorAll("tr[data-is-supplier]");
-    // resultElements.forEach(async (element) => {
-    const priceElement = document.querySelector(".pro-card__price__value");
-    const priceText = priceElement
-      ? priceElement.textContent
-      : "Price not available";
-    return priceText;
+    resultElements.forEach(async (element) => {
+      await element.click("tr[data-is-supplier]"); // Click on each result element
+
+      const priceValueSelector = ".pro-card__price__value";
+      await element.waitForSelector(priceValueSelector);
+      const priceElement = element.querySelector(".pro-card__price__value");
+      const priceText = priceElement
+        ? priceElement?.textContent
+        : "Price not available";
+      pricesArray.push({ priceText });
+    });
+    console.log(pricesArray);
+    return pricesArray;
   });
-  pricesArray.push({ evaluated });
-  console.log(pricesArray);
-  // });
-
-  // return pricesArray;
-  // });
-
+  console.log(evaluated);
   // console.log("Prices:", prices);
 
   // await browser.close();

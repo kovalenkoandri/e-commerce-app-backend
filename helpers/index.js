@@ -7,6 +7,8 @@ const removeDuplicates = require("./removeDuplicates");
 const searchQuery = require("./searchQuery");
 const scrapeGoogleSearchResults = require("./scrapeGoogleSearchResults");
 const scrapeAvtoProResults = require("./scrapeAvtoProResults");
+const scrapePromua = require("./scrapePromua");
+
 module.exports = {
   success200,
   notFound404,
@@ -17,4 +19,5 @@ module.exports = {
   searchQuery,
   scrapeGoogleSearchResults,
   scrapeAvtoProResults,
+  scrapePromua,
 };
