@@ -17,7 +17,7 @@ async function scrapeGoogleSearchResults(query) {
   };
 
   // Scroll a few times to load more results (adjust the loop count based on your needs)
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 3; i++) {
     await scrollPage();
   }
 
@@ -57,5 +57,5 @@ async function scrapeGoogleSearchResults(query) {
 }
 
 // Example usage
-scrapeGoogleSearchResults("712550710");
+// scrapeGoogleSearchResults("712550710");
 module.exports = scrapeGoogleSearchResults;

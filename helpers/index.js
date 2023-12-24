@@ -5,8 +5,8 @@ const sendEmail = require("./sendEmail");
 const fetchEmail = require("./fetchEmail");
 const removeDuplicates = require("./removeDuplicates");
 const searchQuery = require("./searchQuery");
-const scrapeGoogleSearchResults = require('./scrapeGoogleSearchResults');
-
+const scrapeGoogleSearchResults = require("./scrapeGoogleSearchResults");
+const scrapeAvtoProResults = require("./scrapeAvtoProResults");
 module.exports = {
   success200,
   notFound404,
@@ -16,4 +16,5 @@ module.exports = {
   fetchEmail,
   searchQuery,
   scrapeGoogleSearchResults,
+  scrapeAvtoProResults,
 };
