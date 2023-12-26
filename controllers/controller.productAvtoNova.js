@@ -1,5 +1,11 @@
 const Product = require("../models/productAvtoNova");
-const { success200, notFound404 } = require("../helpers");
+const { v4: uuidv4 } = require("uuid");
+
+const {
+  success200,
+  notFound404,
+  scrapeGoogleSearchResults,
+} = require("../helpers");
 
 const product_get = (req, res) => {
   res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
@@ -41,6 +47,19 @@ const product_getByFabricOrOriginalId = async (req, res) => {
   }).exec();
 
   if (!data) notFound404(fabrictId);
+  success200(res, data);
+};
+const product_getByGoogle = async (req, res) => {
+  const { fabrictId } = req.params;
+
+  const products = await scrapeGoogleSearchResults(fabrictId);
+  if (products.length === 0) {
+    notFound404(fabrictId);
+  }
+    const data = products.map((el) => {
+      const newObj = { ...el, _id: uuidv4() };
+      return newObj;
+    });
   success200(res, data);
 };
 
@@ -174,6 +193,7 @@ const product_delete = (req, res) => {
 module.exports = {
   product_get,
   product_getByFabricOrOriginalId,
+  product_getByGoogle,
   product_post,
   product_update,
   product_delete,

@@ -5,6 +5,7 @@ const productController = require("../controllers/controller.productAvtoNova");
 
 router.get("/", productController.product_get);
 router.get("/:fabrictId", productController.product_getByFabricOrOriginalId);
+router.get("/getByGoogle/:fabrictId", productController.product_getByGoogle);
 
 //post
 router.post(

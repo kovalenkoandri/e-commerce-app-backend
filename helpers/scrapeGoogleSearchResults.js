@@ -37,10 +37,11 @@ async function scrapeGoogleSearchResults(query) {
         : "Price not available";
 
       // Use a regular expression to extract the price (assuming it's in the format '162,00 грн')
-      const match = priceText.match(/(\d{1,6}(?:,\d{1,3}))\sгрн/);
+      // const match = priceText.match(/(\d{1,6}(?:,\d{1,3}))\sгрн/);
+      const match = priceText.match(/(\d{1,3}(?:\s\d{3})*(?:,\d{2})?)\sгрн/);
 
       // If a match is found, use the captured group as the price, otherwise set it to 'Price not available'
-      const price = match ? match[1] : "Price not available";
+      const price = match ? match[1].replace(/\s/g, "") : "Price not available";
       return { siteAddress, price };
     });
   });
@@ -54,6 +55,7 @@ async function scrapeGoogleSearchResults(query) {
   console.log("Results:", filteredResults);
 
   await browser.close();
+  return filteredResults;
 }
 
 // Example usage
