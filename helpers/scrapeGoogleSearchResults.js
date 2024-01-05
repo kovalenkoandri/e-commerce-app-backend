@@ -28,8 +28,9 @@ async function scrapeGoogleSearchResults(query) {
     return Array.from(resultElements, (element) => {
       const siteAddress = element.querySelector(
         // 'a[jsname="UWckNb"]',
-        ".VuuXrf", // main name
-        // ".qLRx3b.tjvcx.GvPZzd.cHaqb", // full path
+        // ".VuuXrf", // main name
+        ".qLRx3b.tjvcx.GvPZzd.cHaqb", // full path
+        // ".byrV5b", // div on full path to match results 28 to 18 compare to .qLRx3b.tjvcx.GvPZzd.cHaqb
       )?.textContent;
       const priceElement = element.querySelector(".fG8Fp.uo4vr");
       const priceText = priceElement
@@ -46,16 +47,38 @@ async function scrapeGoogleSearchResults(query) {
     });
   });
 
-  console.log("Prices:", prices);
+  // console.log("Prices:", prices);
   // Filter out objects with 'Price not available'
   const filteredResults = prices.filter(
     (result) => result.price !== "Price not available",
   );
 
-  console.log("Results:", filteredResults);
-
+  // console.log("Results:", filteredResults);
+  const formatedResults = filteredResults.map((el) => ({
+    ...el,
+    siteAddress: el.siteAddress.replace(/ › /g, "/"),
+  }));
+  const rmDots = formatedResults.map((el) => {
+    // Use the regular expression to match URLs
+    const urlMatch = el.siteAddress.match(
+      /(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+/,
+    );
+    // console.log(urlMatch);
+    // Check if a URL match is found
+    if (urlMatch && urlMatch[0]) {
+      // Use the first matched URL
+      return {
+        ...el,
+        siteAddress: urlMatch[0],
+      };
+    } else {
+      // If no URL match is found, keep the original siteAddress
+      return el;
+    }
+  });
+  // console.log(rmDots);
   await browser.close();
-  return filteredResults;
+  return rmDots;
 }
 
 // Example usage
