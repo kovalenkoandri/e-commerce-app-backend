@@ -20,8 +20,12 @@ async function scrapeGoogleSearchResults(query) {
   for (let i = 0; i < 3; i++) {
     await scrollPage();
   }
-
-  await page.waitForSelector(".fG8Fp.uo4vr"); // ensure at least first result awaited
+  try {
+    await page.waitForSelector(".fG8Fp.uo4vr"); // ensure at least first result awaited
+  } catch (error) {
+    console.log(error.message);
+    return [];
+  }
   // Extract prices from the search results
   const prices = await page.evaluate(() => {
     const resultElements = document.querySelectorAll(".MjjYud");
@@ -81,4 +85,5 @@ async function scrapeGoogleSearchResults(query) {
 // Example usage
 // scrapeGoogleSearchResults("712550710");
 // scrapeGoogleSearchResults("karcher wd 3");
+// scrapeGoogleSearchResults("sdfsdfsdfsdfsdffswer");
 module.exports = scrapeGoogleSearchResults;

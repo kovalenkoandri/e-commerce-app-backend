@@ -54,13 +54,14 @@ const product_getByGoogle = async (req, res) => {
 
   const products = await scrapeGoogleSearchResults(fabrictId);
   if (products.length === 0) {
-    notFound404(fabrictId);
-  }
+    success200(res, []);
+  } else {
     const data = products.map((el) => {
       const newObj = { ...el, _id: uuidv4() };
       return newObj;
     });
-  success200(res, data);
+    success200(res, data);
+  }
 };
 
 const product_post = (req, res) => {
