@@ -46,14 +46,9 @@ async function scrapeGoogleSearchResults(query) {
       return { siteAddress, price };
     });
   });
-
-  // console.log("Prices:", prices);
-  // Filter out objects with 'Price not available'
   const filteredResults = prices.filter(
     (result) => result.price !== "Price not available",
   );
-
-  // console.log("Results:", filteredResults);
   const formatedResults = filteredResults.map((el) => ({
     ...el,
     siteAddress: el.siteAddress.replace(/ › /g, "/"),
@@ -76,11 +71,14 @@ async function scrapeGoogleSearchResults(query) {
       return el;
     }
   });
-  // console.log(rmDots);
+  const filteredDups = rmDots.filter((value, index, self) => {
+    return index === self.findIndex((t) => t.siteAddress === value.siteAddress);
+  });
   await browser.close();
-  return rmDots;
+  return filteredDups;
 }
 
 // Example usage
 // scrapeGoogleSearchResults("712550710");
+// scrapeGoogleSearchResults("karcher wd 3");
 module.exports = scrapeGoogleSearchResults;
